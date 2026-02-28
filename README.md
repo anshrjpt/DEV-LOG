@@ -127,6 +127,30 @@ git push origin feature/your-feature-name
 Open a Pull Request with a clear description of what you changed and why.
 
 ---
+## Contributors
+
+<table>
+  <tr>
+    <td align="center">
+      <a href="https://github.com/anshrjpt">
+        <img src="https://github.com/anshrjpt.png" width="80px;" alt="Ansh"/>
+        <br/>
+        <b>Ansh Rajpoot</b>
+      </a>
+      <br/>
+      Core Developer
+    </td>
+    <td align="center">
+      <a href="https://github.com/mishika-agarwal-1111">
+        <img src="https://github.com/mishika-agarwal-1111.png" width="80px;" alt="Mishika"/>
+        <br/>
+        <b>Mishika Agarwal</b>
+      </a>
+      <br/>
+      Core Developer
+    </td>
+  </tr>
+</table>
 
 ## License
 
@@ -138,6 +162,6 @@ MIT License — free to use, modify, and distribute. See [LICENSE](LICENSE) for 
 
 <img src="https://capsule-render.vercel.app/api?type=waving&color=0:1a1814,50:c8860a,100:1a1814&height=100&section=footer" />
 
-Built for the FOSS community · If this helped you, consider giving it a star
+Built for the FOSS community · If this helped you, consider giving it a star.
 
 </div>
