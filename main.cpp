@@ -11,7 +11,7 @@ struct Entry {
     std::string tags;
     int mood;
 };
-//today' date
+//today's date
 std::string getToday() {
     time_t now = time(0);
     tm* ltm = localtime(&now);
@@ -118,23 +118,23 @@ int main(int argc, char* argv[]) {
         newEntry();
     }
     else if (command == "list") {
-        std::cout << "[list] Coming on Day 7!\n\n";
+        std::cout << "  [list] Coming on Day 7!\n\n";
     }
     else if (command == "report") {
-        std::cout << "[report] Coming on Day 15!\n\n";
+        std::cout << "  [report] Coming on Day 15!\n\n";
     }
     else if (command == "search") {
-        std::cout << "[search] Coming on Day 11!\n\n";
-    }
+        std::cout << "  [search] Coming on Day 11!\n\n";
+    }  
     else if (command == "week") {
-        std::cout << "[week] Coming on Day 21!\n\n";
+        std::cout << "  [week] Coming on Day 21!\n\n";
     }
     else if (command == "edit") {
-        std::cout << "[edit] Coming on Day 20!\n\n";
+        std::cout << "  [edit] Coming on Day 20!\n\n";
     }
     else {
-        std::cout << "Unknown command: \"" << command << "\"\n";
-        std::cout << "Run './devlog help' to see available commands.\n\n";
+        std::cout << "  Unknown command: \"" << command << "\"\n";
+        std::cout << "  Run './devlog help' to see available commands.\n\n";
     }
     return 0;
 }
