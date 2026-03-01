@@ -1,13 +1,8 @@
 #include <iostream>
 #include <string>
 #include <ctime>
-
-// ─────────────────────────────────────────
 //  DevLog — Developer Journal CLI
-//  Day 2: Capture user input & display it
-// ─────────────────────────────────────────
-
-// Struct to hold one journal entry
+//  Day 2: take user input & display it
 struct Entry {
     std::string date;
     std::string worked_on;
@@ -16,13 +11,12 @@ struct Entry {
     std::string tags;
     int mood;
 };
-
-// Get today's date as a string like "2026-03-01"
+//today' date
 std::string getToday() {
     time_t now = time(0);
     tm* ltm = localtime(&now);
     char buf[20];
-    strftime(buf, sizeof(buf), "%Y-%m-%d", ltm);
+    strftime(buf, sizeof(buf), "%d-%m-%y", ltm);
     return std::string(buf);
 }
 
@@ -78,7 +72,6 @@ void newEntry() {
     e.blocked    = ask("What blocked you? (type 'nothing' if nothing)");
     e.tags       = ask("Tags — space separated (e.g. cpp networking debug):");
 
-    // Mood with validation
     std::cout << "  \033[34mMood? [1-5]:\033[0m\n";
     std::cout << "  › ";
     std::string moodStr;
@@ -92,11 +85,8 @@ void newEntry() {
             int m = std::stoi(moodStr);
             if (m >= 1 && m <= 5) e.mood = m;
         } catch (...) {
-            // keep default mood of 3
         }
     }
-
-    // Print a clean preview
     std::cout << "  ──────────────────────────────────────────\n";
     std::cout << "  \033[33mEntry Preview — " << today << "\033[0m\n";
     std::cout << "  ──────────────────────────────────────────\n";
@@ -128,24 +118,23 @@ int main(int argc, char* argv[]) {
         newEntry();
     }
     else if (command == "list") {
-        std::cout << "  [list] Coming on Day 7!\n\n";
+        std::cout << "[list] Coming on Day 7!\n\n";
     }
     else if (command == "report") {
-        std::cout << "  [report] Coming on Day 15!\n\n";
+        std::cout << "[report] Coming on Day 15!\n\n";
     }
     else if (command == "search") {
-        std::cout << "  [search] Coming on Day 11!\n\n";
+        std::cout << "[search] Coming on Day 11!\n\n";
     }
     else if (command == "week") {
-        std::cout << "  [week] Coming on Day 21!\n\n";
+        std::cout << "[week] Coming on Day 21!\n\n";
     }
     else if (command == "edit") {
-        std::cout << "  [edit] Coming on Day 20!\n\n";
+        std::cout << "[edit] Coming on Day 20!\n\n";
     }
     else {
-        std::cout << "  Unknown command: \"" << command << "\"\n";
-        std::cout << "  Run './devlog help' to see available commands.\n\n";
+        std::cout << "Unknown command: \"" << command << "\"\n";
+        std::cout << "Run './devlog help' to see available commands.\n\n";
     }
-
     return 0;
 }
