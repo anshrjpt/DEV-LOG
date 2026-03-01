@@ -69,14 +69,14 @@ make
 
 ```
 ┌──────────────────────────────────────────────────────────────────┐
-│                                                                    │
-│   You answer 5        C++ saves each       C++ reads all logs     │
-│   prompts in    →     entry as JSON    →   and computes stats     │
-│   the terminal        to /logs/                  |                │
-│                                                  v                │
-│                       A self-contained HTML report is generated   │
-│                       and saved to /reports/                       │
-│                                                                    │
+│                                                                  │
+│   You answer 5        C++ saves each       C++ reads all logs    │
+│   prompts in    →     entry as JSON    →   and computes stats    │
+│   the terminal        to /logs/                  |               │
+│                                                  v               │
+│                       A self-contained HTML report is generated  │
+│                       and saved to /reports/                     │
+│                                                                  │
 └──────────────────────────────────────────────────────────────────┘
 ```
 
