@@ -1,0 +1,6 @@
+Date: 02-03-26
+Worked on: built devlog cli
+Learned: learned raw strings
+Blocked: nothing
+Tags: cpp cli
+Mood: 4/5
