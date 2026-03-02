@@ -138,36 +138,32 @@ int main(int argc, char* argv[]) {
 
     if (argc < 2) {
         printHelp();
-        return 0;
-    }
-
-    std::string command = argv[1];
-
-    if (command == "help") {
-        printHelp();
-    }
-    else if (command == "new") {
+        return 0;}
+    std::string command==argv[1];
+if(command=="help"){
+    prinHelp();
+}
+    else if(command=="new"){
         newEntry();
     }
-    else if (command == "list") {
-        std::cout << "  [list] Coming on Day 7!\n\n";
+        else if(command=="list"){
+            std::cout<<"  [list] Coming on Day 7!\n\n";
+        }
+    else if(command=="report"){
+        std::cout<< "  [report] Coming on Day 15!\n\n";
     }
-    else if (command == "report") {
-        std::cout << "  [report] Coming on Day 15!\n\n";
-    }
-    else if (command == "search") {
-        std::cout << "  [search] Coming on Day 11!\n\n";
-    }
-    else if (command == "week") {
-        std::cout << "  [week] Coming on Day 21!\n\n";
-    }
-    else if (command == "edit") {
-        std::cout << "  [edit] Coming on Day 20!\n\n";
-    }
-    else {
-        std::cout << "  Unknown command: \"" << command << "\"\n";
-        std::cout << "  Run './devlog help' to see available commands.\n\n";
-    }
-
-    return 0;
+   else if(command=="search"){
+std::cout<<"  [search] Coming on Day 11!\n\n";
+   }
+else if(command=="week"){
+std::cout<<"  [week] Coming on Day 21!\n\n";
+}
+else if(command=="edit"){
+    std::cout<<"  [edit] Coming on Day 20!\n\n";
+}
+else{
+std::cout<<"Unknown command: \""<<command<<"\"\n";
+ std::cout << "  Run './devlog help' to see available commands.\n\n";
+}
+return 0;
 }
