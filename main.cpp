@@ -5,7 +5,6 @@
 #include <sys/stat.h>
 
 // DevLog — Developer Journal CLI
-// Day 3: write entry to logs/ as a dated .txt file
 
 struct Entry {
     std::string date;
