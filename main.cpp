@@ -61,6 +61,7 @@ void printHelp() {
     std::cout << "  Usage: ./devlog <command>\n\n";
     std::cout << "  Commands:\n";
     std::cout << "    new      ->  Log today's dev session\n";
+    std::cout << "    read     ->  Read entry by date (YYYY-MM-DD)\n";
     std::cout << "    list     ->  View all past entries\n";
     std::cout << "    search   ->  Search entries by keyword\n";
     std::cout << "    report   ->  Generate HTML report\n";
@@ -68,11 +69,31 @@ void printHelp() {
     std::cout << "    edit     ->  Edit the last entry\n";
     std::cout << "    help     ->  Show this help message\n";
     std::cout << "\n";
-    std::cout << "  Example: ./devlog new\n\n";
+    std::cout << "  Examples:\n";
+    std::cout << "    ./devlog new\n";
+    std::cout << "    ./devlog read 2026-03-01\n\n";
 }
 
 void createLogsFolder() {
     mkdir("logs", 0777);
+}
+
+void readCommand(const std::string& date) {
+    std::string filename = "logs/" + date + ".json";
+    std::ifstream file(filename);
+
+    if (!file.is_open()) {
+        std::cout << "  \033[31mx No entry found for: " << date << "\033[0m\n";
+        std::cout << "  Make sure the date format is YYYY-MM-DD (e.g. 2026-03-01)\n\n";
+        return;
+    }
+
+    std::cout << "\n  \033[33m--- ENTRY | " << date << " ---\033[0m\n\n";
+    std::string line;
+    while (std::getline(file, line)) {
+        std::cout << "  " << line << "\n";
+    }
+    std::cout << "\n";
 }
 
 void newEntry() {
@@ -115,18 +136,20 @@ void newEntry() {
     std::cout << "  Mood: " << e.mood << "/5\n";
     std::cout << "  ──────────────────────────────────────────\n\n";
 
-    // save to file
+    // save as json
     createLogsFolder();
-    std::string filename = "logs/" + todayFilename + ".txt";
+    std::string filename = "logs/" + todayFilename + ".json";
     std::ofstream file(filename);
 
     if (file.is_open()) {
-        file << "Date: " << e.date << "\n";
-        file << "Worked on: " << e.worked_on << "\n";
-        file << "Learned: " << e.learned << "\n";
-        file << "Blocked: " << e.blocked << "\n";
-        file << "Tags: " << e.tags << "\n";
-        file << "Mood: " << e.mood << "/5\n";
+        file<<"{\n";
+        file << "  \"Date\": \"" << e.date << "\",\n";
+        file << "  \"Worked on\": \"" << e.worked_on << "\",\n";
+        file << "  \"Learned\": \""   << e.learned   << "\",\n";
+        file << "  \"blocked\": \""   << e.blocked   << "\",\n";
+        file << "  \"tags\": \""      << e.tags      << "\",\n";
+        file << "  \"mood\": "        << e.mood      << "\n";
+        file << "}\n";
         std::cout << "  \033[32m✓ Entry saved to " << filename << "\033[0m\n\n";
     } else {
         std::cout << "  \033[31m✗ Could not save entry.\033[0m\n\n";
@@ -135,36 +158,40 @@ void newEntry() {
 
 int main(int argc, char* argv[]) {
 
-    printBanner();
+      printBanner();
 
     if (argc < 2) {
         printHelp();
-        return 0;}
-    std::string command=argv[1];
-if(command=="help"){
-    printHelp();
-}
-    else if(command=="new"){
+        return 0;
+    }
+
+    std::string command = argv[1];
+
+    if (command == "help") {
+        printHelp();
+    } else if (command == "new") {
         newEntry();
-    }
-        else if(command=="list"){
-            std::cout<<"  [list] Coming on Day 7!\n\n";
+    } else if (command == "read") {
+        if (argc < 3) {
+            std::cout << "  \033[31mx Please provide a date.\033[0m\n";
+            std::cout << "  Usage: ./devlog read 2026-03-01\n\n";
+        } else {
+            readCommand(argv[2]);
         }
-    else if(command=="report"){
-        std::cout<< "  [report] Coming on Day 15!\n\n";
+    } else if (command == "list") {
+        std::cout << "  [list] Coming on Day 7!\n\n";
+    } else if (command == "report") {
+        std::cout << "  [report] Coming on Day 15!\n\n";
+    } else if (command == "search") {
+        std::cout << "  [search] Coming on Day 11!\n\n";
+    } else if (command == "week") {
+        std::cout << "  [week] Coming on Day 21!\n\n";
+    } else if (command == "edit") {
+        std::cout << "  [edit] Coming on Day 20!\n\n";
+    } else {
+        std::cout << "Unknown command: \"" << command << "\"\n";
+        std::cout << "  Run './devlog help' to see available commands.\n\n";
     }
-   else if(command=="search"){
-std::cout<<"  [search] Coming on Day 11!\n\n";
-   }
-else if(command=="week"){
-std::cout<<"  [week] Coming on Day 21!\n\n";
-}
-else if(command=="edit"){
-    std::cout<<"  [edit] Coming on Day 20!\n\n";
-}
-else{
-std::cout<<"Unknown command: \""<<command<<"\"\n";
- std::cout << "  Run './devlog help' to see available commands.\n\n";
-}
-return 0;
+
+    return 0;
 }
