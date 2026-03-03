@@ -5,6 +5,7 @@
 #include <sys/stat.h>
 
 // DevLog — Developer Journal CLI
+// Day 4: fix json keys, file.close(), duplicate entry warning
 
 struct Entry {
     std::string date;
@@ -23,9 +24,8 @@ std::string getToday() {
     return std::string(buf);
 }
 
-// same as getToday() but YYYY-MM-DD so files sort correctly
 std::string getTodayForFilename() {
-    time_t now = time(0); 
+    time_t now = time(0);
     tm* ltm = localtime(&now);
     char buf[20];
     strftime(buf, sizeof(buf), "%Y-%m-%d", ltm);
@@ -47,7 +47,7 @@ void printBanner() {
   |                                  |
   |   >> DEVLOG                      |
   |   // developer journal           |
-  |   ## v0.1 | FOSS | CLI           |
+  |   ## v0.4 | FOSS | CLI           |
   |                                  |
   +----------------------------------+
 
@@ -92,21 +92,38 @@ void readCommand(const std::string& date) {
     while (std::getline(file, line)) {
         std::cout << "  " << line << "\n";
     }
+    file.close();
     std::cout << "\n";
 }
 
 void newEntry() {
-    auto today = getToday();
+    auto today         = getToday();
     auto todayFilename = getTodayForFilename();
+
+    // FIX 1 — warn if entry already exists for today
+    std::string filename = "logs/" + todayFilename + ".json";
+    std::ifstream checkFile(filename);
+    if (checkFile.is_open()) {
+        checkFile.close();
+        std::cout << "  \033[33m! Entry already exists for today.\033[0m\n";
+        std::cout << "  Overwrite it? (y/n): ";
+        std::string answer;
+        std::getline(std::cin, answer);
+        std::cout << "\n";
+        if (answer != "y" && answer != "Y") {
+            std::cout << "  Entry kept unchanged.\n\n";
+            return;
+        }
+    }
 
     std::cout << "\n  \033[33m--- DEV LOG | " << today << " ---\033[0m\n\n";
 
     Entry e;
-    e.date = today;
+    e.date      = today;
     e.worked_on = ask("What did you work on today?");
-    e.learned = ask("What did you learn?");
-    e.blocked = ask("What blocked you? (type 'nothing' if nothing)");
-    e.tags = ask("Tags — space separated (e.g. cpp networking debug):");
+    e.learned   = ask("What did you learn?");
+    e.blocked   = ask("What blocked you? (type 'nothing' if nothing)");
+    e.tags      = ask("Tags — space separated (e.g. cpp networking debug):");
 
     std::cout << "  \033[34mMood? [1-5]:\033[0m\n";
     std::cout << "  › ";
@@ -114,41 +131,38 @@ void newEntry() {
     std::getline(std::cin, moodStr);
     std::cout << "\n";
 
-    // clamp to 1-5
-    e.mood = 3; // default
+    e.mood = 3;
     if (!moodStr.empty()) {
         try {
             int m = std::stoi(moodStr);
             if (m >= 1 && m <= 5) e.mood = m;
-        } catch (...) {
-        }
+        } catch (...) {}
     }
 
-    // show preview
     std::cout << "  ──────────────────────────────────────────\n";
     std::cout << "  \033[33mEntry Preview — " << today << "\033[0m\n";
     std::cout << "  ──────────────────────────────────────────\n";
-    std::cout << "  Worked on: " << e.worked_on << "\n";
-    std::cout << "  Learned: " << e.learned << "\n";
-    std::cout << "  Blocked: " << e.blocked << "\n";
-    std::cout << "  Tags: " << e.tags << "\n";
-    std::cout << "  Mood: " << e.mood << "/5\n";
+    std::cout << "  Worked on : " << e.worked_on << "\n";
+    std::cout << "  Learned   : " << e.learned   << "\n";
+    std::cout << "  Blocked   : " << e.blocked   << "\n";
+    std::cout << "  Tags      : " << e.tags      << "\n";
+    std::cout << "  Mood      : " << e.mood      << "/5\n";
     std::cout << "  ──────────────────────────────────────────\n\n";
 
-    // save as json
     createLogsFolder();
-    std::string filename = "logs/" + todayFilename + ".json";
     std::ofstream file(filename);
 
     if (file.is_open()) {
-        file<<"{\n";
-        file << "  \"Date\": \"" << e.date << "\",\n";
-        file << "  \"Worked on\": \"" << e.worked_on << "\",\n";
-        file << "  \"Learned\": \""   << e.learned   << "\",\n";
+        // FIX 2 — all json keys consistently lowercase
+        file << "{\n";
+        file << "  \"date\": \""      << e.date      << "\",\n";
+        file << "  \"worked_on\": \"" << e.worked_on << "\",\n";
+        file << "  \"learned\": \""   << e.learned   << "\",\n";
         file << "  \"blocked\": \""   << e.blocked   << "\",\n";
         file << "  \"tags\": \""      << e.tags      << "\",\n";
         file << "  \"mood\": "        << e.mood      << "\n";
         file << "}\n";
+        file.close(); // FIX 3 — was missing before
         std::cout << "  \033[32m✓ Entry saved to " << filename << "\033[0m\n\n";
     } else {
         std::cout << "  \033[31m✗ Could not save entry.\033[0m\n\n";
@@ -157,7 +171,7 @@ void newEntry() {
 
 int main(int argc, char* argv[]) {
 
-      printBanner();
+    printBanner();
 
     if (argc < 2) {
         printHelp();
@@ -188,9 +202,11 @@ int main(int argc, char* argv[]) {
     } else if (command == "edit") {
         std::cout << "  [edit] Coming on Day 20!\n\n";
     } else {
-        std::cout << "Unknown command: \"" << command << "\"\n";
+        // FIX 4 — consistent spacing
+        std::cout << "  Unknown command: \"" << command << "\"\n";
         std::cout << "  Run './devlog help' to see available commands.\n\n";
     }
 
     return 0;
 }
+
