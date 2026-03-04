@@ -12,7 +12,7 @@
 #endif
 
 // DevLog — Developer Journal CLI
-// Day 4: fix json keys, file.close(), duplicate entry warning, cross-platform mkdir
+// Day 5: parse json fields and display cleanly
 
 struct Entry {
     std::string date;
@@ -54,7 +54,7 @@ void printBanner() {
   |                                  |
   |   >> DEVLOG                      |
   |   // developer journal           |
-  |   ## v0.4 | FOSS | CLI           |
+  |   ## v0.5 | FOSS | CLI           |
   |                                  |
   +----------------------------------+
 
@@ -84,6 +84,40 @@ void createLogsFolder() {
     MAKE_DIR("logs");
 }
 
+// NEW in Day 5 — pulls a single field's value out of json
+std::string parseField(const std::string& json, const std::string& key) {
+    std::string searchKey = "\"" + key + "\"";
+    size_t keyPos = json.find(searchKey);
+    if (keyPos == std::string::npos) return "";
+
+    size_t colonPos = json.find(":", keyPos);
+    if (colonPos == std::string::npos) return "";
+
+    size_t quoteStart = json.find("\"", colonPos);
+    if (quoteStart == std::string::npos) return "";
+
+    size_t quoteEnd = json.find("\"", quoteStart + 1);
+    if (quoteEnd == std::string::npos) return "";
+
+    return json.substr(quoteStart + 1, quoteEnd - quoteStart - 1);
+}
+
+// NEW in Day 5 — pulls mood value out (no quotes around it)
+int parseMood(const std::string& json) {
+    std::string searchKey = "\"mood\"";
+    size_t keyPos = json.find(searchKey);
+    if (keyPos == std::string::npos) return 0;
+
+    size_t colonPos = json.find(":", keyPos);
+    if (colonPos == std::string::npos) return 0;
+
+    size_t numStart = json.find_first_not_of(" \n", colonPos + 1);
+    if (numStart == std::string::npos) return 0;
+
+    return std::stoi(json.substr(numStart));
+}
+
+// UPDATED in Day 5 — now parses and displays cleanly
 void readCommand(const std::string& date) {
     std::string filename = "logs/" + date + ".json";
     std::ifstream file(filename);
@@ -94,12 +128,27 @@ void readCommand(const std::string& date) {
         return;
     }
 
-    std::cout << "\n  \033[33m--- ENTRY | " << date << " ---\033[0m\n\n";
-    std::string line;
-    while (std::getline(file, line)) {
-        std::cout << "  " << line << "\n";
-    }
+    // read entire file into one string
+    std::string json((std::istreambuf_iterator<char>(file)),
+                      std::istreambuf_iterator<char>());
     file.close();
+
+    // parse each field
+    std::string displayDate = parseField(json, "date");
+    std::string workedOn    = parseField(json, "worked_on");
+    std::string learned     = parseField(json, "learned");
+    std::string blocked     = parseField(json, "blocked");
+    std::string tags        = parseField(json, "tags");
+    int mood                = parseMood(json);
+
+    // display cleanly
+    std::cout << "\n  \033[33m--- ENTRY | " << date << " ---\033[0m\n\n";
+    std::cout << "  Date      : " << displayDate << "\n";
+    std::cout << "  Worked on : " << workedOn    << "\n";
+    std::cout << "  Learned   : " << learned     << "\n";
+    std::cout << "  Blocked   : " << blocked     << "\n";
+    std::cout << "  Tags      : " << tags        << "\n";
+    std::cout << "  Mood      : " << mood        << "/5\n";
     std::cout << "\n";
 }
 
@@ -160,7 +209,6 @@ void newEntry() {
     std::ofstream file(filename);
 
     if (file.is_open()) {
-        // all json keys consistently lowercase
         file << "{\n";
         file << "  \"date\": \""      << e.date      << "\",\n";
         file << "  \"worked_on\": \"" << e.worked_on << "\",\n";
