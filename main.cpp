@@ -2,10 +2,17 @@
 #include <string>
 #include <ctime>
 #include <fstream>
-#include <sys/stat.h>
+
+#ifdef _WIN32
+    #include <direct.h>
+    #define MAKE_DIR(path) _mkdir(path)
+#else
+    #include <sys/stat.h>
+    #define MAKE_DIR(path) mkdir(path, 0777)
+#endif
 
 // DevLog — Developer Journal CLI
-// Day 4: fix json keys, file.close(), duplicate entry warning
+// Day 4: fix json keys, file.close(), duplicate entry warning, cross-platform mkdir
 
 struct Entry {
     std::string date;
@@ -74,7 +81,7 @@ void printHelp() {
 }
 
 void createLogsFolder() {
-    mkdir("logs", 0777);
+    MAKE_DIR("logs");
 }
 
 void readCommand(const std::string& date) {
@@ -100,7 +107,7 @@ void newEntry() {
     auto today         = getToday();
     auto todayFilename = getTodayForFilename();
 
-    // FIX 1 — warn if entry already exists for today
+    // warn if entry already exists for today
     std::string filename = "logs/" + todayFilename + ".json";
     std::ifstream checkFile(filename);
     if (checkFile.is_open()) {
@@ -153,7 +160,7 @@ void newEntry() {
     std::ofstream file(filename);
 
     if (file.is_open()) {
-        // FIX 2 — all json keys consistently lowercase
+        // all json keys consistently lowercase
         file << "{\n";
         file << "  \"date\": \""      << e.date      << "\",\n";
         file << "  \"worked_on\": \"" << e.worked_on << "\",\n";
@@ -162,7 +169,7 @@ void newEntry() {
         file << "  \"tags\": \""      << e.tags      << "\",\n";
         file << "  \"mood\": "        << e.mood      << "\n";
         file << "}\n";
-        file.close(); // FIX 3 — was missing before
+        file.close();
         std::cout << "  \033[32m✓ Entry saved to " << filename << "\033[0m\n\n";
     } else {
         std::cout << "  \033[31m✗ Could not save entry.\033[0m\n\n";
@@ -202,11 +209,9 @@ int main(int argc, char* argv[]) {
     } else if (command == "edit") {
         std::cout << "  [edit] Coming on Day 20!\n\n";
     } else {
-        // FIX 4 — consistent spacing
         std::cout << "  Unknown command: \"" << command << "\"\n";
         std::cout << "  Run './devlog help' to see available commands.\n\n";
     }
 
     return 0;
 }
-
