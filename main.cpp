@@ -2,6 +2,9 @@
 #include <string>
 #include <ctime>
 #include <fstream>
+#include <vector>
+#include <algorithm>
+#include <filesystem>
 
 #ifdef _WIN32
     #include <direct.h>
@@ -12,7 +15,8 @@
 #endif
 
 // DevLog — Developer Journal CLI
-// Day 5: parse json fields and display cleanly
+
+namespace fs = std::filesystem;
 
 struct Entry {
     std::string date;
@@ -115,6 +119,27 @@ int parseMood(const std::string& json) {
     if (numStart == std::string::npos) return 0;
 
     return std::stoi(json.substr(numStart));
+}
+
+Entry readEntry(const std::string& filename) {
+    Entry e;
+    e.mood = 0;
+
+    std::ifstream file(filename);
+    if (!file.is_open()) return e;
+
+    std::string json((std::istreambuf_iterator<char>(file)),
+                      std::istreambuf_iterator<char>());
+    file.close();
+
+    e.date      = parseField(json, "date");
+    e.worked_on = parseField(json, "worked_on");
+    e.learned   = parseField(json, "learned");
+    e.blocked   = parseField(json, "blocked");
+    e.tags      = parseField(json, "tags");
+    e.mood      = parseMood(json);
+
+    return e;
 }
 
 // UPDATED in Day 5 — now parses and displays cleanly
@@ -223,6 +248,50 @@ void newEntry() {
         std::cout << "  \033[31m✗ Could not save entry.\033[0m\n\n";
     }
 }
+void listEntries() {
+    if (!fs::exists("logs")) {
+        std::cout << "  \033[31mx No logs folder found.\033[0m\n";
+        std::cout << "  Run './devlog new' to create your first entry!\n\n";
+        return;
+    }
+
+    std::vector<std::string> files;
+    for (const auto& entry : fs::directory_iterator("logs")) {
+        if (entry.path().extension() == ".json") {
+            files.push_back(entry.path().string());
+        }
+    }
+
+    if (files.empty()) {
+        std::cout << "  No entries yet. Run './devlog new' to log your first day!\n\n";
+        return;
+    }
+
+    std::sort(files.begin(), files.end());
+
+    std::cout << "\n  \033[33m──────────────────────────────────────────\033[0m\n";
+    std::cout << "  \033[33mAll Entries (" << files.size() << " found)\033[0m\n";
+    std::cout << "  \033[33m──────────────────────────────────────────\033[0m\n\n";
+
+    int i = 1;
+    for (const auto& filename : files) {
+        Entry e = readEntry(filename);
+
+        std::string moodBar = "";
+        for (int m = 0; m < e.mood; m++)  moodBar += "█";
+        for (int m = e.mood; m < 5; m++)  moodBar += "░";
+
+        std::cout << "  \033[34m[" << i << "] " << e.date << "\033[0m\n";
+        std::cout << "      Worked on : " << e.worked_on << "\n";
+        std::cout << "      Learned   : " << e.learned   << "\n";
+        std::cout << "      Tags      : " << e.tags      << "\n";
+        std::cout << "      Mood      : " << moodBar << " " << e.mood << "/5\n\n";
+        i++;
+    }
+
+    std::cout << "  \033[33m──────────────────────────────────────────\033[0m\n";
+    std::cout << "  Total: " << files.size() << " entries\n\n";
+}
 
 int main(int argc, char* argv[]) {
 
@@ -247,7 +316,7 @@ int main(int argc, char* argv[]) {
             readCommand(argv[2]);
         }
     } else if (command == "list") {
-        std::cout << "  [list] Coming on Day 7!\n\n";
+         listEntries();
     } else if (command == "report") {
         std::cout << "  [report] Coming on Day 15!\n\n";
     } else if (command == "search") {
