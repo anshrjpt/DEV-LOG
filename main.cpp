@@ -134,7 +134,7 @@ Entry readEntry(const std::string& filename) {
     return e;
 }
 
-// UPDATED in Day 5 — now parses and displays cleanly
+//now parses and displays cleanly
 void readCommand(const std::string& date) {
     std::string filename = "logs/" + date + ".json";
     std::ifstream file(filename);
