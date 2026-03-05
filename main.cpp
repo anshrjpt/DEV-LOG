@@ -4,15 +4,14 @@
 #include <fstream>
 #include <vector>
 #include <algorithm>
-#include <dirent.h>
-#include <sys/stat.h>
-
 
 #ifdef _WIN32
     #include <direct.h>
+    #include <windows.h>
     #define MAKE_DIR(path) _mkdir(path)
 #else
     #include <sys/stat.h>
+    #include <dirent.h>
     #define MAKE_DIR(path) mkdir(path, 0777)
 #endif
 
@@ -80,7 +79,6 @@ void createLogsFolder() {
     MAKE_DIR("logs");
 }
 
-// NEW in Day 5 — pulls a single field's value out of json
 std::string parseField(const std::string& json, const std::string& key) {
     std::string searchKey = "\"" + key + "\"";
     size_t keyPos = json.find(searchKey);
@@ -98,7 +96,6 @@ std::string parseField(const std::string& json, const std::string& key) {
     return json.substr(quoteStart + 1, quoteEnd - quoteStart - 1);
 }
 
-// NEW in Day 5 — pulls mood value out (no quotes around it)
 int parseMood(const std::string& json) {
     std::string searchKey = "\"mood\"";
     size_t keyPos = json.find(searchKey);
@@ -134,7 +131,6 @@ Entry readEntry(const std::string& filename) {
     return e;
 }
 
-//now parses and displays cleanly
 void readCommand(const std::string& date) {
     std::string filename = "logs/" + date + ".json";
     std::ifstream file(filename);
@@ -145,12 +141,10 @@ void readCommand(const std::string& date) {
         return;
     }
 
-    // read entire file into one string
     std::string json((std::istreambuf_iterator<char>(file)),
                       std::istreambuf_iterator<char>());
     file.close();
 
-    // parse each field
     std::string displayDate = parseField(json, "date");
     std::string workedOn    = parseField(json, "worked_on");
     std::string learned     = parseField(json, "learned");
@@ -158,7 +152,6 @@ void readCommand(const std::string& date) {
     std::string tags        = parseField(json, "tags");
     int mood                = parseMood(json);
 
-    // display cleanly
     std::cout << "\n  \033[33m--- ENTRY | " << date << " ---\033[0m\n\n";
     std::cout << "  Date      : " << displayDate << "\n";
     std::cout << "  Worked on : " << workedOn    << "\n";
@@ -170,11 +163,9 @@ void readCommand(const std::string& date) {
 }
 
 void newEntry() {
-    auto today         = getToday();
-    auto todayFilename = getToday();
+    auto today    = getToday();
+    std::string filename = "logs/" + today + ".json";
 
-    // warn if entry already exists for today
-    std::string filename = "logs/" + todayFilename + ".json";
     std::ifstream checkFile(filename);
     if (checkFile.is_open()) {
         checkFile.close();
@@ -212,7 +203,6 @@ void newEntry() {
         } catch (...) {}
     }
 
-
     std::cout << "  ──────────────────────────────────────────\n";
     std::cout << "  \033[33mEntry Preview — " << today << "\033[0m\n";
     std::cout << "  ──────────────────────────────────────────\n";
@@ -223,9 +213,7 @@ void newEntry() {
     std::cout << "  Mood      : " << e.mood      << "/5\n";
     std::cout << "  ──────────────────────────────────────────\n\n";
 
-
-   
- createLogsFolder();
+    createLogsFolder();
     std::ofstream file(filename);
 
     if (file.is_open()) {
@@ -243,15 +231,24 @@ void newEntry() {
         std::cout << "  \033[31m✗ Could not save entry.\033[0m\n\n";
     }
 }
-void listEntries() {
-    DIR* dir = opendir("logs");
-    if (!dir) {
-        std::cout << "  \033[31mx No logs folder found.\033[0m\n";
-        std::cout << "  Run './devlog new' to create your first entry!\n\n";
-        return;
-    }
 
+// FIX — cross platform folder reading
+std::vector<std::string> getJsonFiles() {
     std::vector<std::string> files;
+
+#ifdef _WIN32
+    // Windows version using FindFirstFile
+    WIN32_FIND_DATAA ffd;
+    HANDLE hFind = FindFirstFileA("logs\\*.json", &ffd);
+    if (hFind == INVALID_HANDLE_VALUE) return files;
+    do {
+        files.push_back("logs/" + std::string(ffd.cFileName));
+    } while (FindNextFileA(hFind, &ffd) != 0);
+    FindClose(hFind);
+#else
+    // Mac/Linux version using dirent
+    DIR* dir = opendir("logs");
+    if (!dir) return files;
     struct dirent* ent;
     while ((ent = readdir(dir)) != nullptr) {
         std::string name = ent->d_name;
@@ -260,9 +257,17 @@ void listEntries() {
         }
     }
     closedir(dir);
+#endif
+
+    return files;
+}
+
+void listEntries() {
+    std::vector<std::string> files = getJsonFiles();
 
     if (files.empty()) {
-        std::cout << "  No entries yet. Run './devlog new' to log your first day!\n\n";
+        std::cout << "  \033[31mx No logs folder or entries found.\033[0m\n";
+        std::cout << "  Run './devlog new' to create your first entry!\n\n";
         return;
     }
 
@@ -277,8 +282,8 @@ void listEntries() {
         Entry e = readEntry(filename);
 
         std::string moodBar = "";
-        for (int m = 0; m < e.mood; m++)  moodBar += "█";
-        for (int m = e.mood; m < 5; m++)  moodBar += "░";
+        for (int m = 0; m < e.mood; m++)  moodBar += "*";
+        for (int m = e.mood; m < 5; m++)  moodBar += "-";
 
         std::cout << "  \033[34m[" << i << "] " << e.date << "\033[0m\n";
         std::cout << "      Worked on : " << e.worked_on << "\n";
@@ -315,7 +320,7 @@ int main(int argc, char* argv[]) {
             readCommand(argv[2]);
         }
     } else if (command == "list") {
-         listEntries();
+        listEntries();
     } else if (command == "report") {
         std::cout << "  [report] Coming on Day 15!\n\n";
     } else if (command == "search") {
