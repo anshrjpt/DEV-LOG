@@ -4,6 +4,9 @@
 #include <fstream>
 #include <vector>
 #include <algorithm>
+#include <sstream>
+#include <iomanip>
+#include <map>
 
 #ifdef _WIN32
     #include <direct.h>
@@ -49,7 +52,7 @@ void printBanner() {
   |                                  |
   |   >> DEVLOG                      |
   |   // developer journal           |
-  |   ## v0.5 | FOSS | CLI           |
+  |   ## v0.6 | FOSS | CLI           |
   |                                  |
   +----------------------------------+
 
@@ -163,7 +166,7 @@ void readCommand(const std::string& date) {
 }
 
 void newEntry() {
-    auto today    = getToday();
+    auto today = getToday();
     std::string filename = "logs/" + today + ".json";
 
     std::ifstream checkFile(filename);
@@ -185,9 +188,15 @@ void newEntry() {
     Entry e;
     e.date      = today;
     e.worked_on = ask("What did you work on today?");
-    e.learned   = ask("What did you learn?");
-    e.blocked   = ask("What blocked you? (type 'nothing' if nothing)");
-    e.tags      = ask("Tags — space separated (e.g. cpp networking debug):");
+
+    if (e.worked_on.empty()) {
+        std::cout << "  \033[31mx worked_on cannot be empty. Entry cancelled.\033[0m\n\n";
+        return;
+    }
+
+    e.learned = ask("What did you learn?");
+    e.blocked = ask("What blocked you? (type 'nothing' if nothing)");
+    e.tags    = ask("Tags — space separated (e.g. cpp networking debug):");
 
     std::cout << "  \033[34mMood? [1-5]:\033[0m\n";
     std::cout << "  › ";
@@ -203,15 +212,15 @@ void newEntry() {
         } catch (...) {}
     }
 
-    std::cout << "  ──────────────────────────────────────────\n";
-    std::cout << "  \033[33mEntry Preview — " << today << "\033[0m\n";
-    std::cout << "  ──────────────────────────────────────────\n";
+    std::cout << "  ------------------------------------------\n";
+    std::cout << "  \033[33mEntry Preview -- " << today << "\033[0m\n";
+    std::cout << "  ------------------------------------------\n";
     std::cout << "  Worked on : " << e.worked_on << "\n";
     std::cout << "  Learned   : " << e.learned   << "\n";
     std::cout << "  Blocked   : " << e.blocked   << "\n";
     std::cout << "  Tags      : " << e.tags      << "\n";
     std::cout << "  Mood      : " << e.mood      << "/5\n";
-    std::cout << "  ──────────────────────────────────────────\n\n";
+    std::cout << "  ------------------------------------------\n\n";
 
     createLogsFolder();
     std::ofstream file(filename);
@@ -226,18 +235,17 @@ void newEntry() {
         file << "  \"mood\": "        << e.mood      << "\n";
         file << "}\n";
         file.close();
-        std::cout << "  \033[32m✓ Entry saved to " << filename << "\033[0m\n\n";
+        std::cout << "  \033[32mv Entry saved to " << filename << "\033[0m\n\n";
     } else {
-        std::cout << "  \033[31m✗ Could not save entry.\033[0m\n\n";
+        std::cout << "  \033[31mx Could not save entry.\033[0m\n\n";
     }
 }
 
-// FIX — cross platform folder reading
+// cross platform folder reading
 std::vector<std::string> getJsonFiles() {
     std::vector<std::string> files;
 
 #ifdef _WIN32
-    // Windows version using FindFirstFile
     WIN32_FIND_DATAA ffd;
     HANDLE hFind = FindFirstFileA("logs\\*.json", &ffd);
     if (hFind == INVALID_HANDLE_VALUE) return files;
@@ -246,7 +254,6 @@ std::vector<std::string> getJsonFiles() {
     } while (FindNextFileA(hFind, &ffd) != 0);
     FindClose(hFind);
 #else
-    // Mac/Linux version using dirent
     DIR* dir = opendir("logs");
     if (!dir) return files;
     struct dirent* ent;
@@ -262,6 +269,7 @@ std::vector<std::string> getJsonFiles() {
     return files;
 }
 
+// Day 6 — improved list with summary stats
 void listEntries() {
     std::vector<std::string> files = getJsonFiles();
 
@@ -273,28 +281,71 @@ void listEntries() {
 
     std::sort(files.begin(), files.end());
 
-    std::cout << "\n  \033[33m──────────────────────────────────────────\033[0m\n";
+    // stats trackers
+    int totalMood       = 0;
+    std::string firstDate = "";
+    std::string lastDate  = "";
+    std::map<std::string, int> tagCount;
+
+    std::cout << "\n  \033[33m------------------------------------------\033[0m\n";
     std::cout << "  \033[33mAll Entries (" << files.size() << " found)\033[0m\n";
-    std::cout << "  \033[33m──────────────────────────────────────────\033[0m\n\n";
+    std::cout << "  \033[33m------------------------------------------\033[0m\n\n";
 
     int i = 1;
     for (const auto& filename : files) {
         Entry e = readEntry(filename);
 
+        // track first and last date
+        if (firstDate.empty()) firstDate = e.date;
+        lastDate = e.date;
+
+        // add to mood total
+        totalMood += e.mood;
+
+        // count each tag
+        std::istringstream iss(e.tags);
+        std::string tag;
+        while (iss >> tag) {
+            tagCount[tag]++;
+        }
+
+        // build mood bar  e.g. [***--]
         std::string moodBar = "";
         for (int m = 0; m < e.mood; m++)  moodBar += "*";
         for (int m = e.mood; m < 5; m++)  moodBar += "-";
 
+        // print entry
         std::cout << "  \033[34m[" << i << "] " << e.date << "\033[0m\n";
         std::cout << "      Worked on : " << e.worked_on << "\n";
         std::cout << "      Learned   : " << e.learned   << "\n";
+        std::cout << "      Blocked   : " << e.blocked   << "\n";
         std::cout << "      Tags      : " << e.tags      << "\n";
-        std::cout << "      Mood      : " << moodBar << " " << e.mood << "/5\n\n";
+        std::cout << "      Mood      : [" << moodBar << "] " << e.mood << "/5\n\n";
         i++;
     }
 
-    std::cout << "  \033[33m──────────────────────────────────────────\033[0m\n";
-    std::cout << "  Total: " << files.size() << " entries\n\n";
+    // find most used tag
+    std::string topTag = "none";
+    int topCount = 0;
+    for (const auto& pair : tagCount) {
+        if (pair.second > topCount) {
+            topCount = pair.second;
+            topTag   = pair.first;
+        }
+    }
+
+    // calculate average mood
+    double avgMood = (double)totalMood / files.size();
+
+    // print summary block
+    std::cout << "  \033[33m------------------------------------------\033[0m\n";
+    std::cout << "  \033[33mSummary\033[0m\n";
+    std::cout << "  \033[33m------------------------------------------\033[0m\n";
+    std::cout << "  Total entries : " << files.size() << "\n";
+    std::cout << "  Date range    : " << firstDate << "  ->  " << lastDate << "\n";
+    std::cout << "  Avg mood      : " << std::fixed << std::setprecision(1) << avgMood << "/5\n";
+    std::cout << "  Top tag       : " << topTag << " (" << topCount << " times)\n";
+    std::cout << "  \033[33m------------------------------------------\033[0m\n\n";
 }
 
 int main(int argc, char* argv[]) {
