@@ -37,7 +37,6 @@ std::string getToday() {
     return std::string(buf);
 }
 
-// FIX Bug 1 -- replaced special › with plain >
 std::string ask(const std::string& question) {
     std::cout << "  \033[34m" << question << "\033[0m\n";
     std::cout << "  > ";
@@ -47,13 +46,31 @@ std::string ask(const std::string& question) {
     return answer;
 }
 
+// Day 7 -- converts string to lowercase for case-insensitive search
+std::string toLower(const std::string& s) {
+    std::string result = s;
+    for (char& c : result) c = tolower(c);
+    return result;
+}
+
+// Day 7 -- checks if keyword appears anywhere in the entry
+bool entryMatches(const Entry& e, const std::string& keyword) {
+    std::string kw = toLower(keyword);
+    if (toLower(e.worked_on).find(kw) != std::string::npos) return true;
+    if (toLower(e.learned).find(kw)   != std::string::npos) return true;
+    if (toLower(e.blocked).find(kw)   != std::string::npos) return true;
+    if (toLower(e.tags).find(kw)      != std::string::npos) return true;
+    if (toLower(e.date).find(kw)      != std::string::npos) return true;
+    return false;
+}
+
 void printBanner() {
     std::cout << "\n";
     std::cout << "  +----------------------------------+\n";
     std::cout << "  |                                  |\n";
     std::cout << "  |   >> DEVLOG                      |\n";
     std::cout << "  |   // developer journal           |\n";
-    std::cout << "  |   ## v0.6 | FOSS | CLI           |\n";
+    std::cout << "  |   ## v0.7 | FOSS | CLI           |\n";
     std::cout << "  |                                  |\n";
     std::cout << "  +----------------------------------+\n";
     std::cout << "\n";
@@ -74,7 +91,8 @@ void printHelp() {
     std::cout << "\n";
     std::cout << "  Examples:\n";
     std::cout << "    ./devlog new\n";
-    std::cout << "    ./devlog read 2026-03-01\n\n";
+    std::cout << "    ./devlog read 2026-03-01\n";
+    std::cout << "    ./devlog search cpp\n\n";
 }
 
 void createLogsFolder() {
@@ -197,7 +215,6 @@ void newEntry() {
     e.blocked = ask("What blocked you? (type 'nothing' if nothing)");
     e.tags    = ask("Tags -- space separated (e.g. cpp networking debug):");
 
-    // FIX Bug 1 -- replaced special › with plain >
     std::cout << "  \033[34mMood? [1-5]:\033[0m\n";
     std::cout << "  > ";
     std::string moodStr;
@@ -235,7 +252,6 @@ void newEntry() {
         file << "  \"mood\": "        << e.mood      << "\n";
         file << "}\n";
         file.close();
-        // FIX Bug 2 -- replaced ✓ with [OK]
         std::cout << "  \033[32m[OK] Entry saved to " << filename << "\033[0m\n\n";
     } else {
         std::cout << "  \033[31m[x] Could not save entry.\033[0m\n\n";
@@ -270,7 +286,6 @@ std::vector<std::string> getJsonFiles() {
     return files;
 }
 
-// Day 6 -- improved list with summary stats
 void listEntries() {
     std::vector<std::string> files = getJsonFiles();
 
@@ -297,16 +312,12 @@ void listEntries() {
 
         if (firstDate.empty()) firstDate = e.date;
         lastDate = e.date;
-
         totalMood += e.mood;
 
         std::istringstream iss(e.tags);
         std::string tag;
-        while (iss >> tag) {
-            tagCount[tag]++;
-        }
+        while (iss >> tag) tagCount[tag]++;
 
-        // FIX Bug 3 -- replaced █ and ░ with * and -
         std::string moodBar = "";
         for (int m = 0; m < e.mood; m++)  moodBar += "*";
         for (int m = e.mood; m < 5; m++)  moodBar += "-";
@@ -341,14 +352,60 @@ void listEntries() {
     std::cout << "  \033[33m------------------------------------------\033[0m\n\n";
 }
 
+// Day 7 -- search command
+void searchEntries(const std::string& keyword) {
+    std::vector<std::string> files = getJsonFiles();
+
+    if (files.empty()) {
+        std::cout << "  \033[31m[x] No entries found.\033[0m\n";
+        std::cout << "  Run './devlog new' to create your first entry!\n\n";
+        return;
+    }
+
+    std::sort(files.begin(), files.end());
+
+    std::vector<Entry> matches;
+    for (const auto& filename : files) {
+        Entry e = readEntry(filename);
+        if (entryMatches(e, keyword)) {
+            matches.push_back(e);
+        }
+    }
+
+    if (matches.empty()) {
+        std::cout << "\n  \033[31m[x] No entries found for: \"" << keyword << "\"\033[0m\n\n";
+        return;
+    }
+
+    std::cout << "\n  \033[33m------------------------------------------\033[0m\n";
+    std::cout << "  \033[33mSearch: \"" << keyword << "\" (" << matches.size() << " found)\033[0m\n";
+    std::cout << "  \033[33m------------------------------------------\033[0m\n\n";
+
+    int i = 1;
+    for (const auto& e : matches) {
+        std::string moodBar = "";
+        for (int m = 0; m < e.mood; m++)  moodBar += "*";
+        for (int m = e.mood; m < 5; m++)  moodBar += "-";
+
+        std::cout << "  \033[34m[" << i << "] " << e.date << "\033[0m\n";
+        std::cout << "      Worked on : " << e.worked_on << "\n";
+        std::cout << "      Learned   : " << e.learned   << "\n";
+        std::cout << "      Blocked   : " << e.blocked   << "\n";
+        std::cout << "      Tags      : " << e.tags      << "\n";
+        std::cout << "      Mood      : [" << moodBar << "] " << e.mood << "/5\n\n";
+        i++;
+    }
+
+    std::cout << "  \033[33m------------------------------------------\033[0m\n";
+    std::cout << "  " << matches.size() << " match(es) for \"" << keyword << "\"\n";
+    std::cout << "  \033[33m------------------------------------------\033[0m\n\n";
+}
+
 int main(int argc, char* argv[]) {
 
-    // FIX Bug 4 -- enable ANSI colors on Windows terminal
+    // FIX -- enable ANSI colors on Windows using system("color")
     #ifdef _WIN32
-        HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
-        DWORD dwMode = 0;
-        GetConsoleMode(hOut, &dwMode);
-        SetConsoleMode(hOut, dwMode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+        system("color");
     #endif
 
     printBanner();
@@ -373,10 +430,15 @@ int main(int argc, char* argv[]) {
         }
     } else if (command == "list") {
         listEntries();
+    } else if (command == "search") {
+        if (argc < 3) {
+            std::cout << "  \033[31m[x] Please provide a keyword.\033[0m\n";
+            std::cout << "  Usage: ./devlog search cpp\n\n";
+        } else {
+            searchEntries(argv[2]);
+        }
     } else if (command == "report") {
         std::cout << "  [report] Coming on Day 15!\n\n";
-    } else if (command == "search") {
-        std::cout << "  [search] Coming on Day 11!\n\n";
     } else if (command == "week") {
         std::cout << "  [week] Coming on Day 21!\n\n";
     } else if (command == "edit") {
