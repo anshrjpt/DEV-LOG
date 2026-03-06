@@ -18,7 +18,7 @@
     #define MAKE_DIR(path) mkdir(path, 0777)
 #endif
 
-// DevLog — Developer Journal CLI
+// DevLog -- Developer Journal CLI
 
 struct Entry {
     std::string date;
@@ -37,9 +37,10 @@ std::string getToday() {
     return std::string(buf);
 }
 
+// FIX Bug 1 -- replaced special › with plain >
 std::string ask(const std::string& question) {
     std::cout << "  \033[34m" << question << "\033[0m\n";
-    std::cout << "  › ";
+    std::cout << "  > ";
     std::string answer;
     std::getline(std::cin, answer);
     std::cout << "\n";
@@ -47,18 +48,16 @@ std::string ask(const std::string& question) {
 }
 
 void printBanner() {
-    std::cout << R"(
-  +----------------------------------+
-  |                                  |
-  |   >> DEVLOG                      |
-  |   // developer journal           |
-  |   ## v0.6 | FOSS | CLI           |
-  |                                  |
-  +----------------------------------+
-
-  type './devlog help' to get started
-
-)";
+    std::cout << "\n";
+    std::cout << "  +----------------------------------+\n";
+    std::cout << "  |                                  |\n";
+    std::cout << "  |   >> DEVLOG                      |\n";
+    std::cout << "  |   // developer journal           |\n";
+    std::cout << "  |   ## v0.6 | FOSS | CLI           |\n";
+    std::cout << "  |                                  |\n";
+    std::cout << "  +----------------------------------+\n";
+    std::cout << "\n";
+    std::cout << "  type './devlog help' to get started\n\n";
 }
 
 void printHelp() {
@@ -139,7 +138,7 @@ void readCommand(const std::string& date) {
     std::ifstream file(filename);
 
     if (!file.is_open()) {
-        std::cout << "  \033[31mx No entry found for: " << date << "\033[0m\n";
+        std::cout << "  \033[31m[x] No entry found for: " << date << "\033[0m\n";
         std::cout << "  Make sure the date format is YYYY-MM-DD (e.g. 2026-03-01)\n\n";
         return;
     }
@@ -172,7 +171,7 @@ void newEntry() {
     std::ifstream checkFile(filename);
     if (checkFile.is_open()) {
         checkFile.close();
-        std::cout << "  \033[33m! Entry already exists for today.\033[0m\n";
+        std::cout << "  \033[33m[!] Entry already exists for today.\033[0m\n";
         std::cout << "  Overwrite it? (y/n): ";
         std::string answer;
         std::getline(std::cin, answer);
@@ -190,16 +189,17 @@ void newEntry() {
     e.worked_on = ask("What did you work on today?");
 
     if (e.worked_on.empty()) {
-        std::cout << "  \033[31mx worked_on cannot be empty. Entry cancelled.\033[0m\n\n";
+        std::cout << "  \033[31m[x] worked_on cannot be empty. Entry cancelled.\033[0m\n\n";
         return;
     }
 
     e.learned = ask("What did you learn?");
     e.blocked = ask("What blocked you? (type 'nothing' if nothing)");
-    e.tags    = ask("Tags — space separated (e.g. cpp networking debug):");
+    e.tags    = ask("Tags -- space separated (e.g. cpp networking debug):");
 
+    // FIX Bug 1 -- replaced special › with plain >
     std::cout << "  \033[34mMood? [1-5]:\033[0m\n";
-    std::cout << "  › ";
+    std::cout << "  > ";
     std::string moodStr;
     std::getline(std::cin, moodStr);
     std::cout << "\n";
@@ -235,9 +235,10 @@ void newEntry() {
         file << "  \"mood\": "        << e.mood      << "\n";
         file << "}\n";
         file.close();
-        std::cout << "  \033[32mv Entry saved to " << filename << "\033[0m\n\n";
+        // FIX Bug 2 -- replaced ✓ with [OK]
+        std::cout << "  \033[32m[OK] Entry saved to " << filename << "\033[0m\n\n";
     } else {
-        std::cout << "  \033[31mx Could not save entry.\033[0m\n\n";
+        std::cout << "  \033[31m[x] Could not save entry.\033[0m\n\n";
     }
 }
 
@@ -269,20 +270,19 @@ std::vector<std::string> getJsonFiles() {
     return files;
 }
 
-// Day 6 — improved list with summary stats
+// Day 6 -- improved list with summary stats
 void listEntries() {
     std::vector<std::string> files = getJsonFiles();
 
     if (files.empty()) {
-        std::cout << "  \033[31mx No logs folder or entries found.\033[0m\n";
+        std::cout << "  \033[31m[x] No logs folder or entries found.\033[0m\n";
         std::cout << "  Run './devlog new' to create your first entry!\n\n";
         return;
     }
 
     std::sort(files.begin(), files.end());
 
-    // stats trackers
-    int totalMood       = 0;
+    int totalMood         = 0;
     std::string firstDate = "";
     std::string lastDate  = "";
     std::map<std::string, int> tagCount;
@@ -295,26 +295,22 @@ void listEntries() {
     for (const auto& filename : files) {
         Entry e = readEntry(filename);
 
-        // track first and last date
         if (firstDate.empty()) firstDate = e.date;
         lastDate = e.date;
 
-        // add to mood total
         totalMood += e.mood;
 
-        // count each tag
         std::istringstream iss(e.tags);
         std::string tag;
         while (iss >> tag) {
             tagCount[tag]++;
         }
 
-        // build mood bar  e.g. [***--]
+        // FIX Bug 3 -- replaced █ and ░ with * and -
         std::string moodBar = "";
         for (int m = 0; m < e.mood; m++)  moodBar += "*";
         for (int m = e.mood; m < 5; m++)  moodBar += "-";
 
-        // print entry
         std::cout << "  \033[34m[" << i << "] " << e.date << "\033[0m\n";
         std::cout << "      Worked on : " << e.worked_on << "\n";
         std::cout << "      Learned   : " << e.learned   << "\n";
@@ -324,7 +320,6 @@ void listEntries() {
         i++;
     }
 
-    // find most used tag
     std::string topTag = "none";
     int topCount = 0;
     for (const auto& pair : tagCount) {
@@ -334,10 +329,8 @@ void listEntries() {
         }
     }
 
-    // calculate average mood
     double avgMood = (double)totalMood / files.size();
 
-    // print summary block
     std::cout << "  \033[33m------------------------------------------\033[0m\n";
     std::cout << "  \033[33mSummary\033[0m\n";
     std::cout << "  \033[33m------------------------------------------\033[0m\n";
@@ -349,6 +342,14 @@ void listEntries() {
 }
 
 int main(int argc, char* argv[]) {
+
+    // FIX Bug 4 -- enable ANSI colors on Windows terminal
+    #ifdef _WIN32
+        HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+        DWORD dwMode = 0;
+        GetConsoleMode(hOut, &dwMode);
+        SetConsoleMode(hOut, dwMode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+    #endif
 
     printBanner();
 
@@ -365,7 +366,7 @@ int main(int argc, char* argv[]) {
         newEntry();
     } else if (command == "read") {
         if (argc < 3) {
-            std::cout << "  \033[31mx Please provide a date.\033[0m\n";
+            std::cout << "  \033[31m[x] Please provide a date.\033[0m\n";
             std::cout << "  Usage: ./devlog read 2026-03-01\n\n";
         } else {
             readCommand(argv[2]);
