@@ -36,6 +36,18 @@ std::string getToday() {
     strftime(buf, sizeof(buf), "%Y-%m-%d", ltm);
     return std::string(buf);
 }
+std::string addDays(const std::string& date, int days) {
+    struct tm t = {};
+    int y, m, d;
+    sscanf(date.c_str(), "%d-%d-%d", &y, &m, &d);
+    t.tm_year = y - 1900;
+    t.tm_mon  = m - 1;
+    t.tm_mday = d + days;
+    mktime(&t);
+    char buf[20];
+    strftime(buf, sizeof(buf), "%Y-%m-%d", &t);
+    return std::string(buf);
+}
 
 std::string ask(const std::string& question) {
     std::cout << "  \033[34m" << question << "\033[0m\n";
@@ -70,7 +82,7 @@ void printBanner() {
     std::cout << "  |                                  |\n";
     std::cout << "  |   >> DEVLOG                      |\n";
     std::cout << "  |   // developer journal           |\n";
-    std::cout << "  |   ## v0.7 | FOSS | CLI           |\n";
+    std::cout << "  |   ## v0.8 | FOSS | CLI           |\n";
     std::cout << "  |                                  |\n";
     std::cout << "  +----------------------------------+\n";
     std::cout << "\n";
@@ -84,6 +96,7 @@ void printHelp() {
     std::cout << "    read     ->  Read entry by date (YYYY-MM-DD)\n";
     std::cout << "    list     ->  View all past entries\n";
     std::cout << "    search   ->  Search entries by keyword\n";
+    std::cout << "    stats    ->  Show coding stats dashboard\n";
     std::cout << "    report   ->  Generate HTML report\n";
     std::cout << "    week     ->  Show this week's summary\n";
     std::cout << "    edit     ->  Edit the last entry\n";
@@ -400,6 +413,97 @@ void searchEntries(const std::string& keyword) {
     std::cout << "  " << matches.size() << " match(es) for \"" << keyword << "\"\n";
     std::cout << "  \033[33m------------------------------------------\033[0m\n\n";
 }
+void showStats() {
+    std::vector<std::string> files = getJsonFiles();
+
+    if (files.empty()) {
+        std::cout << "  \033[31m[x] No entries found.\033[0m\n";
+        std::cout << "  Run './devlog new' to create your first entry!\n\n";
+        return;
+    }
+
+    std::sort(files.begin(), files.end());
+
+    std::vector<Entry> entries;
+    for (const auto& filename : files) {
+        entries.push_back(readEntry(filename));
+    }
+
+    int totalEntries  = entries.size();
+    int totalMood     = 0;
+    int bestMood      = 0;
+    std::string bestMoodDate = "";
+    std::map<std::string, int> tagCount;
+
+    for (const auto& e : entries) {
+        totalMood += e.mood;
+        if (e.mood > bestMood) {
+            bestMood     = e.mood;
+            bestMoodDate = e.date;
+        }
+        std::istringstream iss(e.tags);
+        std::string tag;
+        while (iss >> tag) tagCount[tag]++;
+    }
+
+    std::string topTag = "none";
+    int topCount       = 0;
+    for (const auto& pair : tagCount) {
+        if (pair.second > topCount) {
+            topCount = pair.second;
+            topTag   = pair.first;
+        }
+    }
+
+    int currentStreak = 0;
+    std::string checkDate = getToday();
+    for (int i = 0; i < totalEntries; i++) {
+        std::string filename = "logs/" + checkDate + ".json";
+        std::ifstream f(filename);
+        if (f.is_open()) {
+            f.close();
+            currentStreak++;
+            checkDate = addDays(checkDate, -1);
+        } else {
+            break;
+        }
+    }
+
+    int longestStreak = 0;
+    int currentRun    = 1;
+    for (int i = 1; i < (int)entries.size(); i++) {
+        std::string expected = addDays(entries[i-1].date, 1);
+        if (entries[i].date == expected) {
+            currentRun++;
+            if (currentRun > longestStreak) longestStreak = currentRun;
+        } else {
+            currentRun = 1;
+        }
+    }
+    if (longestStreak == 0) longestStreak = 1;
+
+    double avgMood = (double)totalMood / totalEntries;
+
+    std::cout << "\n  \033[33m------------------------------------------\033[0m\n";
+    std::cout << "  \033[33mDEV STATS\033[0m\n";
+    std::cout << "  \033[33m------------------------------------------\033[0m\n\n";
+    std::cout << "  Total entries   : " << totalEntries << "\n";
+    std::cout << "  Current streak  : " << currentStreak << " day(s)\n";
+    std::cout << "  Longest streak  : " << longestStreak << " day(s)\n";
+    std::cout << "  Best mood day   : " << bestMoodDate << " (" << bestMood << "/5)\n";
+    std::cout << "  Most used tag   : " << topTag << " (" << topCount << " times)\n";
+    std::cout << "  Avg mood        : " << std::fixed << std::setprecision(1) << avgMood << "/5\n";
+    std::cout << "  Total tags used : " << tagCount.size() << " unique\n\n";
+
+    std::cout << "  Mood trend (oldest -> newest):\n  ";
+    for (const auto& e : entries) {
+        if      (e.mood >= 4) std::cout << "\033[32m█\033[0m";
+        else if (e.mood == 3) std::cout << "\033[33m█\033[0m";
+        else                  std::cout << "\033[31m█\033[0m";
+    }
+    std::cout << "\n  (green=good, yellow=ok, red=rough)\n\n";
+    std::cout << "  \033[33m------------------------------------------\033[0m\n\n";
+}
 
 int main(int argc, char* argv[]) {
 
@@ -437,7 +541,9 @@ int main(int argc, char* argv[]) {
         } else {
             searchEntries(argv[2]);
         }
-    } else if (command == "report") {
+    }else if (command == "stats") {
+        showStats();}
+     else if (command == "report") {
         std::cout << "  [report] Coming on Day 15!\n\n";
     } else if (command == "week") {
         std::cout << "  [week] Coming on Day 21!\n\n";
