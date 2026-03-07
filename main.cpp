@@ -504,6 +504,60 @@ void showStats() {
     std::cout << "\n  (green=good, yellow=ok, red=rough)\n\n";
     std::cout << "  \033[33m------------------------------------------\033[0m\n\n";
 }
+void showWeek() {
+    std::vector<std::string> files = getJsonFiles();
+    std::sort(files.begin(), files.end());
+
+    // get start of this week (Monday)
+    time_t now = time(0);
+    tm* ltm = localtime(&now);
+    int todayWeekday = ltm->tm_wday;
+    // convert Sunday=0 to Monday-based
+    int daysFromMonday = (todayWeekday == 0) ? 6 : todayWeekday - 1;
+
+    std::string weekStart = addDays(getToday(), -daysFromMonday);
+    std::string weekEnd   = addDays(weekStart, 6);
+
+    std::cout << "\n  \033[33m------------------------------------------\033[0m\n";
+    std::cout << "  \033[33mTHIS WEEK | " << weekStart << " to " << weekEnd << "\033[0m\n";
+    std::cout << "  \033[33m------------------------------------------\033[0m\n\n";
+
+    std::vector<Entry> weekEntries;
+    for (const auto& filename : files) {
+        Entry e = readEntry(filename);
+        if (e.date >= weekStart && e.date <= weekEnd) {
+            weekEntries.push_back(e);
+        }
+    }
+
+    if (weekEntries.empty()) {
+        std::cout << "  No entries this week yet.\n";
+        std::cout << "  Run './devlog new' to log today!\n\n";
+        return;
+    }
+
+    int totalMood = 0;
+    int i = 1;
+    for (const auto& e : weekEntries) {
+        std::string moodBar = "";
+        for (int m = 0; m < e.mood; m++)  moodBar += "*";
+        for (int m = e.mood; m < 5; m++)  moodBar += "-";
+
+        std::cout << "  \033[34m[" << i << "] " << e.date << "\033[0m";
+        std::cout << "  Mood: [" << moodBar << "] " << e.mood << "/5\n";
+        std::cout << "      " << e.worked_on << "\n\n";
+
+        totalMood += e.mood;
+        i++;
+    }
+
+    double avgMood = (double)totalMood / weekEntries.size();
+
+    std::cout << "  \033[33m------------------------------------------\033[0m\n";
+    std::cout << "  Days logged : " << weekEntries.size() << "/7\n";
+    std::cout << "  Avg mood    : " << std::fixed << std::setprecision(1) << avgMood << "/5\n";
+    std::cout << "  \033[33m------------------------------------------\033[0m\n\n";
+}
 
 int main(int argc, char* argv[]) {
 
@@ -546,7 +600,8 @@ int main(int argc, char* argv[]) {
      else if (command == "report") {
         std::cout << "  [report] Coming on Day 15!\n\n";
     } else if (command == "week") {
-        std::cout << "  [week] Coming on Day 21!\n\n";
+        } else if (command == "week") {
+        showWeek();
     } else if (command == "edit") {
         std::cout << "  [edit] Coming on Day 20!\n\n";
     } else {
