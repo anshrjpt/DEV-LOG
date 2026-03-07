@@ -50,19 +50,20 @@ make
   ██║  ██║██╔══╝  ╚██╗ ██╔╝██║     ██║   ██║██║   ██║
   ██████╔╝███████╗ ╚████╔╝ ███████╗╚██████╔╝╚██████╔╝
 
-  Developer Journal · v0.1 · FOSS
+  Developer Journal · v0.8 · FOSS
 ```
 
 | Command | Description |
 |:---|:---|
 | `./devlog new` | Log today's dev session |
 | `./devlog list` | View all past entries |
+| `./devlog read <date>` | Read entry by date (YYYY-MM-DD) |
 | `./devlog search <keyword>` | Search entries by keyword |
+| `./devlog stats` | Show coding stats dashboard |
 | `./devlog report` | Generate a full HTML report |
 | `./devlog week` | Show this week's summary |
 | `./devlog edit` | Edit the last entry |
 | `./devlog help` | Show all commands |
-
 ---
 
 ## How It Works
@@ -106,12 +107,11 @@ This project is being built live at **1 hour per day** as part of a FOSS hackath
 
 | Phase | Days | Status |
 |:---|:---|:---|
-| Foundation & Setup | Days 1-5 | In Progress |
-| Core C++ Logic | Days 6-12 | Upcoming |
+| Foundation & Setup | Days 1-5 | Complete |
+| Core C++ Logic | Days 6-12 | In Progress |
 | HTML Report Generator | Days 13-19 | Upcoming |
 | Extra Features | Days 20-22 | Upcoming |
 | Polish & Submit | Days 23-25 | Upcoming |
-
 ---
 
 ## Contributing
