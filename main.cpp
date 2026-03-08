@@ -75,13 +75,101 @@ bool entryMatches(const Entry& e, const std::string& keyword) {
     return false;
 }
 
+// NEW -- checks streak and mood, prints warnings after banner
+void checkReminders() {
+    // --- Streak reminder ---
+    std::string yesterday = addDays(getToday(), -1);
+    std::string yFile = "logs/" + yesterday + ".json";
+    std::string todayFile = "logs/" + getToday() + ".json";
+
+    std::ifstream yCheck(yFile);
+    std::ifstream tCheck(todayFile);
+
+    bool loggedYesterday = yCheck.is_open();
+    bool loggedToday     = tCheck.is_open();
+    yCheck.close();
+    tCheck.close();
+
+    if (!loggedToday && !loggedYesterday) {
+        std::cout << "  \033[31m[!] You missed yesterday! Streak at risk.\033[0m\n";
+        std::cout << "  Run './devlog new' to log today and keep going.\n\n";
+    } else if (!loggedToday) {
+        std::cout << "  \033[33m[!] You haven't logged today yet.\033[0m\n";
+        std::cout << "  Run './devlog new' before the day ends!\n\n";
+    }
+
+    // --- Mood warning ---
+    // read last 3 entries and check if avg is below 2.5
+    std::vector<std::string> files;
+
+#ifdef _WIN32
+    WIN32_FIND_DATAA ffd;
+    HANDLE hFind = FindFirstFileA("logs\\*.json", &ffd);
+    if (hFind != INVALID_HANDLE_VALUE) {
+        do {
+            files.push_back("logs/" + std::string(ffd.cFileName));
+        } while (FindNextFileA(hFind, &ffd) != 0);
+        FindClose(hFind);
+    }
+#else
+    DIR* dir = opendir("logs");
+    if (dir) {
+        struct dirent* ent;
+        while ((ent = readdir(dir)) != nullptr) {
+            std::string name = ent->d_name;
+            if (name.size() > 5 && name.substr(name.size() - 5) == ".json") {
+                files.push_back("logs/" + name);
+            }
+        }
+        closedir(dir);
+    }
+#endif
+
+    if (files.size() >= 3) {
+        std::sort(files.begin(), files.end());
+
+        // take last 3 only
+        int total = 0;
+        int count = 0;
+        for (int i = (int)files.size() - 3; i < (int)files.size(); i++) {
+            std::ifstream f(files[i]);
+            if (!f.is_open()) continue;
+            std::string json((std::istreambuf_iterator<char>(f)),
+                              std::istreambuf_iterator<char>());
+            f.close();
+
+            // parse mood manually
+            std::string key = "\"mood\"";
+            size_t kp = json.find(key);
+            if (kp == std::string::npos) continue;
+            size_t cp = json.find(":", kp);
+            if (cp == std::string::npos) continue;
+            size_t ns = json.find_first_not_of(" \n", cp + 1);
+            if (ns == std::string::npos) continue;
+
+            int mood = std::stoi(json.substr(ns));
+            total += mood;
+            count++;
+        }
+
+        if (count > 0) {
+            double avg = (double)total / count;
+            if (avg < 2.5) {
+                std::cout << "  \033[31m[!] Mood alert: your last 3 entries avg " 
+                          << std::fixed << std::setprecision(1) << avg << "/5\033[0m\n";
+                std::cout << "  Take a break if you need one. You got this.\n\n";
+            }
+        }
+    }
+}
+
 void printBanner() {
     std::cout << "\n";
     std::cout << "  +----------------------------------+\n";
     std::cout << "  |                                  |\n";
     std::cout << "  |   >> DEVLOG                      |\n";
     std::cout << "  |   // developer journal           |\n";
-    std::cout << "  |   ## v0.8 | FOSS | CLI           |\n";
+    std::cout << "  |   ## v0.9 | FOSS | CLI           |\n";
     std::cout << "  |                                  |\n";
     std::cout << "  +----------------------------------+\n";
     std::cout << "\n";
@@ -377,9 +465,7 @@ void searchEntries(const std::string& keyword) {
     std::vector<Entry> matches;
     for (const auto& filename : files) {
         Entry e = readEntry(filename);
-        if (entryMatches(e, keyword)) {
-            matches.push_back(e);
-        }
+        if (entryMatches(e, keyword)) matches.push_back(e);
     }
 
     if (matches.empty()) {
@@ -423,9 +509,7 @@ void showStats() {
     std::sort(files.begin(), files.end());
 
     std::vector<Entry> entries;
-    for (const auto& filename : files) {
-        entries.push_back(readEntry(filename));
-    }
+    for (const auto& filename : files) entries.push_back(readEntry(filename));
 
     int totalEntries     = entries.size();
     int totalMood        = 0;
@@ -456,29 +540,24 @@ void showStats() {
     int currentStreak = 0;
     std::string checkDate = getToday();
     for (int i = 0; i < totalEntries; i++) {
-        std::string filename = "logs/" + checkDate + ".json";
-        std::ifstream f(filename);
+        std::ifstream f("logs/" + checkDate + ".json");
         if (f.is_open()) {
             f.close();
             currentStreak++;
             checkDate = addDays(checkDate, -1);
-        } else {
-            break;
-        }
+        } else break;
     }
 
-    int longestStreak = 0;
+    int longestStreak = 1;
     int currentRun    = 1;
     for (int i = 1; i < (int)entries.size(); i++) {
-        std::string expected = addDays(entries[i-1].date, 1);
-        if (entries[i].date == expected) {
+        if (entries[i].date == addDays(entries[i-1].date, 1)) {
             currentRun++;
             if (currentRun > longestStreak) longestStreak = currentRun;
         } else {
             currentRun = 1;
         }
     }
-    if (longestStreak == 0) longestStreak = 1;
 
     double avgMood = (double)totalMood / totalEntries;
 
@@ -493,7 +572,6 @@ void showStats() {
     std::cout << "  Avg mood        : " << std::fixed << std::setprecision(1) << avgMood << "/5\n";
     std::cout << "  Total tags used : " << tagCount.size() << " unique\n\n";
 
-    // FIX Bug 4 -- replaced █ with [G]/[Y]/[R] (safe on all Windows terminals)
     std::cout << "  Mood trend (oldest -> newest):\n  ";
     for (const auto& e : entries) {
         if      (e.mood >= 4) std::cout << "\033[32m[G]\033[0m";
@@ -510,7 +588,7 @@ void showWeek() {
 
     time_t now = time(0);
     tm* ltm = localtime(&now);
-    int todayWeekday = ltm->tm_wday;
+    int todayWeekday   = ltm->tm_wday;
     int daysFromMonday = (todayWeekday == 0) ? 6 : todayWeekday - 1;
 
     std::string weekStart = addDays(getToday(), -daysFromMonday);
@@ -523,9 +601,7 @@ void showWeek() {
     std::vector<Entry> weekEntries;
     for (const auto& filename : files) {
         Entry e = readEntry(filename);
-        if (e.date >= weekStart && e.date <= weekEnd) {
-            weekEntries.push_back(e);
-        }
+        if (e.date >= weekStart && e.date <= weekEnd) weekEntries.push_back(e);
     }
 
     if (weekEntries.empty()) {
@@ -565,6 +641,9 @@ int main(int argc, char* argv[]) {
 
     printBanner();
 
+    // NEW -- runs every time devlog starts
+    checkReminders();
+
     if (argc < 2) {
         printHelp();
         return 0;
@@ -595,7 +674,6 @@ int main(int argc, char* argv[]) {
     } else if (command == "stats") {
         showStats();
     } else if (command == "week") {
-        // FIX Bug 1+2 -- removed duplicate, kept only one working week block
         showWeek();
     } else if (command == "report") {
         std::cout << "  [report] Coming on Day 15!\n\n";
@@ -607,4 +685,4 @@ int main(int argc, char* argv[]) {
     }
 
     return 0;
-} 
+}} 
