@@ -22,6 +22,7 @@
 
 struct Entry {
     std::string date;
+    std::string time;
     std::string worked_on;
     std::string learned;
     std::string blocked;
@@ -48,6 +49,40 @@ std::string addDays(const std::string& date, int days) {
     char buf[20];
     strftime(buf, sizeof(buf), "%Y-%m-%d", &t);
     return std::string(buf);
+}
+
+// NEW 1 — gets current time as HH:MM
+std::string getTime() {
+    time_t now = time(0);
+    tm* ltm = localtime(&now);
+    char buf[10];
+    strftime(buf, sizeof(buf), "%H:%M", ltm);
+    return std::string(buf);
+}
+
+// NEW 2 — counts total entries saved
+int countEntries() {
+    int count = 0;
+    std::ifstream indexFile("logs/count.txt");
+    if (indexFile.is_open()) {
+        indexFile >> count;
+        indexFile.close();
+    }
+    count++;
+    std::ofstream outFile("logs/count.txt");
+    outFile << count;
+    outFile.close();
+    return count;
+}
+
+// NEW 3 — converts mood number to stars
+std::string moodToStars(int mood) {
+    std::string stars = "";
+    for (int i = 1; i <= 5; i++) {
+        if (i <= mood) stars += "*";
+        else           stars += "-";
+    }
+    return stars;
 }
 
 std::string ask(const std::string& question) {
@@ -300,10 +335,11 @@ void newEntry() {
         }
     }
 
-    std::cout << "\n  \033[33m--- DEV LOG | " << today << " ---\033[0m\n\n";
+    std::cout << "\n  \033[33m--- DEV LOG | " << today << " | " << currentTime << " ---\033[0m\n\n";
 
     Entry e;
     e.date      = today;
+    e.time      = currentTime;
     e.worked_on = ask("What did you work on today?");
 
     if (e.worked_on.empty()) {
@@ -345,6 +381,7 @@ void newEntry() {
     if (file.is_open()) {
         file << "{\n";
         file << "  \"date\": \""      << e.date      << "\",\n";
+        file << "  \"time\": \""      << e.time      << "\",\n";
         file << "  \"worked_on\": \"" << e.worked_on << "\",\n";
         file << "  \"learned\": \""   << e.learned   << "\",\n";
         file << "  \"blocked\": \""   << e.blocked   << "\",\n";
