@@ -36,6 +36,7 @@ std::string getToday() {
     strftime(buf, sizeof(buf), "%Y-%m-%d", ltm);
     return std::string(buf);
 }
+
 std::string addDays(const std::string& date, int days) {
     struct tm t = {};
     int y, m, d;
@@ -58,14 +59,12 @@ std::string ask(const std::string& question) {
     return answer;
 }
 
-// Day 7 -- converts string to lowercase for case-insensitive search
 std::string toLower(const std::string& s) {
     std::string result = s;
     for (char& c : result) c = tolower(c);
     return result;
 }
 
-// Day 7 -- checks if keyword appears anywhere in the entry
 bool entryMatches(const Entry& e, const std::string& keyword) {
     std::string kw = toLower(keyword);
     if (toLower(e.worked_on).find(kw) != std::string::npos) return true;
@@ -97,8 +96,8 @@ void printHelp() {
     std::cout << "    list     ->  View all past entries\n";
     std::cout << "    search   ->  Search entries by keyword\n";
     std::cout << "    stats    ->  Show coding stats dashboard\n";
-    std::cout << "    report   ->  Generate HTML report\n";
     std::cout << "    week     ->  Show this week's summary\n";
+    std::cout << "    report   ->  Generate HTML report\n";
     std::cout << "    edit     ->  Edit the last entry\n";
     std::cout << "    help     ->  Show this help message\n";
     std::cout << "\n";
@@ -271,7 +270,6 @@ void newEntry() {
     }
 }
 
-// cross platform folder reading
 std::vector<std::string> getJsonFiles() {
     std::vector<std::string> files;
 
@@ -365,7 +363,6 @@ void listEntries() {
     std::cout << "  \033[33m------------------------------------------\033[0m\n\n";
 }
 
-// Day 7 -- search command
 void searchEntries(const std::string& keyword) {
     std::vector<std::string> files = getJsonFiles();
 
@@ -413,6 +410,7 @@ void searchEntries(const std::string& keyword) {
     std::cout << "  " << matches.size() << " match(es) for \"" << keyword << "\"\n";
     std::cout << "  \033[33m------------------------------------------\033[0m\n\n";
 }
+
 void showStats() {
     std::vector<std::string> files = getJsonFiles();
 
@@ -429,9 +427,9 @@ void showStats() {
         entries.push_back(readEntry(filename));
     }
 
-    int totalEntries  = entries.size();
-    int totalMood     = 0;
-    int bestMood      = 0;
+    int totalEntries     = entries.size();
+    int totalMood        = 0;
+    int bestMood         = 0;
     std::string bestMoodDate = "";
     std::map<std::string, int> tagCount;
 
@@ -495,24 +493,24 @@ void showStats() {
     std::cout << "  Avg mood        : " << std::fixed << std::setprecision(1) << avgMood << "/5\n";
     std::cout << "  Total tags used : " << tagCount.size() << " unique\n\n";
 
+    // FIX Bug 4 -- replaced █ with [G]/[Y]/[R] (safe on all Windows terminals)
     std::cout << "  Mood trend (oldest -> newest):\n  ";
     for (const auto& e : entries) {
-        if      (e.mood >= 4) std::cout << "\033[32m█\033[0m";
-        else if (e.mood == 3) std::cout << "\033[33m█\033[0m";
-        else                  std::cout << "\033[31m█\033[0m";
+        if      (e.mood >= 4) std::cout << "\033[32m[G]\033[0m";
+        else if (e.mood == 3) std::cout << "\033[33m[Y]\033[0m";
+        else                  std::cout << "\033[31m[R]\033[0m";
     }
-    std::cout << "\n  (green=good, yellow=ok, red=rough)\n\n";
+    std::cout << "\n  (G=good, Y=ok, R=rough)\n\n";
     std::cout << "  \033[33m------------------------------------------\033[0m\n\n";
 }
+
 void showWeek() {
     std::vector<std::string> files = getJsonFiles();
     std::sort(files.begin(), files.end());
 
-    // get start of this week (Monday)
     time_t now = time(0);
     tm* ltm = localtime(&now);
     int todayWeekday = ltm->tm_wday;
-    // convert Sunday=0 to Monday-based
     int daysFromMonday = (todayWeekday == 0) ? 6 : todayWeekday - 1;
 
     std::string weekStart = addDays(getToday(), -daysFromMonday);
@@ -561,7 +559,6 @@ void showWeek() {
 
 int main(int argc, char* argv[]) {
 
-    // FIX -- enable ANSI colors on Windows using system("color")
     #ifdef _WIN32
         system("color");
     #endif
@@ -595,13 +592,13 @@ int main(int argc, char* argv[]) {
         } else {
             searchEntries(argv[2]);
         }
-    }else if (command == "stats") {
-        showStats();}
-     else if (command == "report") {
-        std::cout << "  [report] Coming on Day 15!\n\n";
+    } else if (command == "stats") {
+        showStats();
     } else if (command == "week") {
-        } else if (command == "week") {
+        // FIX Bug 1+2 -- removed duplicate, kept only one working week block
         showWeek();
+    } else if (command == "report") {
+        std::cout << "  [report] Coming on Day 15!\n\n";
     } else if (command == "edit") {
         std::cout << "  [edit] Coming on Day 20!\n\n";
     } else {
@@ -610,4 +607,4 @@ int main(int argc, char* argv[]) {
     }
 
     return 0;
-}
+} 
