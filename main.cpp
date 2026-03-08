@@ -319,6 +319,7 @@ void readCommand(const std::string& date) {
 
 void newEntry() {
     auto today = getToday();
+    auto currentTime = getTime();
     std::string filename = "logs/" + today + ".json";
 
     std::ifstream checkFile(filename);
@@ -722,4 +723,4 @@ int main(int argc, char* argv[]) {
     }
 
     return 0;
-}} 
+}
