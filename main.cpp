@@ -204,7 +204,7 @@ void printBanner() {
     std::cout << "  |                                  |\n";
     std::cout << "  |   >> DEVLOG                      |\n";
     std::cout << "  |   // developer journal           |\n";
-    std::cout << "  |   ## v0.9 | FOSS | CLI           |\n";
+    std::cout << "  |   ## v1.0 | FOSS | CLI           |\n";
     std::cout << "  |                                  |\n";
     std::cout << "  +----------------------------------+\n";
     std::cout << "\n";
@@ -670,6 +670,93 @@ void showWeek() {
     std::cout << "  Avg mood    : " << std::fixed << std::setprecision(1) << avgMood << "/5\n";
     std::cout << "  \033[33m------------------------------------------\033[0m\n\n";
 }
+void editEntry() {
+    // find the most recent entry
+    std::vector<std::string> files = getJsonFiles();
+
+    if (files.empty()) {
+        std::cout << "  \033[31m[x] No entries found to edit.\033[0m\n\n";
+        return;
+    }
+
+    std::sort(files.begin(), files.end());
+    std::string lastFile = files.back();
+
+    // extract date from filename
+    std::string lastDate = lastFile.substr(5, 10);
+
+    std::cout << "\n  \033[33m[!] Last entry found: " << lastDate << "\033[0m\n\n";
+    std::cout << "  What do you want to edit?\n";
+    std::cout << "  [1] Worked on\n";
+    std::cout << "  [2] Learned\n";
+    std::cout << "  [3] Blocked\n";
+    std::cout << "  [4] Tags\n";
+    std::cout << "  [5] Mood\n\n";
+    std::cout << "  > ";
+
+    std::string choice;
+    std::getline(std::cin, choice);
+    std::cout << "\n";
+
+    // read existing entry
+    Entry e = readEntry(lastFile);
+
+    if (choice == "1") {
+        std::cout << "  Current: " << e.worked_on << "\n";
+        e.worked_on = ask("New value:");
+        if (e.worked_on.empty()) {
+            std::cout << "  \033[31m[x] Cannot be empty. Edit cancelled.\033[0m\n\n";
+            return;
+        }
+    } else if (choice == "2") {
+        std::cout << "  Current: " << e.learned << "\n";
+        e.learned = ask("New value:");
+    } else if (choice == "3") {
+        std::cout << "  Current: " << e.blocked << "\n";
+        e.blocked = ask("New value:");
+    } else if (choice == "4") {
+        std::cout << "  Current: " << e.tags << "\n";
+        e.tags = ask("New value:");
+    } else if (choice == "5") {
+        std::cout << "  Current mood: " << e.mood << "/5\n";
+        std::cout << "  New mood [1-5]: ";
+        std::string moodStr;
+        std::getline(std::cin, moodStr);
+        std::cout << "\n";
+        try {
+            int m = std::stoi(moodStr);
+            if (m >= 1 && m <= 5) e.mood = m;
+            else {
+                std::cout << "  \033[31m[x] Invalid mood. Edit cancelled.\033[0m\n\n";
+                return;
+            }
+        } catch (...) {
+            std::cout << "  \033[31m[x] Invalid input. Edit cancelled.\033[0m\n\n";
+            return;
+        }
+    } else {
+        std::cout << "  \033[31m[x] Invalid choice. Edit cancelled.\033[0m\n\n";
+        return;
+    }
+
+    // save updated entry back to same file
+    std::ofstream file(lastFile);
+    if (file.is_open()) {
+        file << "{\n";
+        file << "  \"Date\": \""      << e.date      << "\",\n";
+        file << "  \"Time\": \""      << e.time      << "\",\n";
+        file << "  \"Worked_on\": \"" << e.worked_on << "\",\n";
+        file << "  \"Learned\": \""   << e.learned   << "\",\n";
+        file << "  \"Blocked\": \""   << e.blocked   << "\",\n";
+        file << "  \"Tags\": \""      << e.tags      << "\",\n";
+        file << "  \"Mood\": "        << e.mood      << "\n";
+        file << "}\n";
+        file.close();
+        std::cout << "  \033[32m[OK] Entry updated successfully!\033[0m\n\n";
+    } else {
+        std::cout << "  \033[31m[x] Could not save changes.\033[0m\n\n";
+    }
+}
 
 int main(int argc, char* argv[]) {
 
@@ -716,7 +803,7 @@ int main(int argc, char* argv[]) {
     } else if (command == "report") {
         std::cout << "  [report] Coming on Day 15!\n\n";
     } else if (command == "edit") {
-        std::cout << "  [edit] Coming on Day 20!\n\n";
+        editEntry();
     } else {
         std::cout << "  Unknown command: \"" << command << "\"\n";
         std::cout << "  Run './devlog help' to see available commands.\n\n";
