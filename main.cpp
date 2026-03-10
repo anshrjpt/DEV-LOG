@@ -41,7 +41,7 @@ std::string getToday() {
 std::string addDays(const std::string& date, int days) {
     struct tm t = {};
     int y, m, d;
-    sscanf(date.c_str(), "%d-%d-%d", &y, &m, &d);
+    sscanf(date.c_str(), "%d-%d-%d", &y, &m, &d); //lazy parse
     t.tm_year = y - 1900;
     t.tm_mon  = m - 1;
     t.tm_mday = d + days;
@@ -51,7 +51,6 @@ std::string addDays(const std::string& date, int days) {
     return std::string(buf);
 }
 
-// NEW 1 — gets current time as HH:MM
 std::string getTime() {
     time_t now = time(0);
     tm* ltm = localtime(&now);
@@ -60,7 +59,6 @@ std::string getTime() {
     return std::string(buf);
 }
 
-// NEW 2 — counts total entries saved
 int countEntries() {
     int count = 0;
     std::ifstream indexFile("logs/count.txt");
@@ -75,7 +73,7 @@ int countEntries() {
     return count;
 }
 
-// NEW 3 — converts mood number to stars
+
 std::string moodToStars(int mood) {
     std::string stars = "";
     for (int i = 1; i <= 5; i++) {
@@ -102,15 +100,15 @@ std::string toLower(const std::string& s) {
 
 bool entryMatches(const Entry& e, const std::string& keyword) {
     std::string kw = toLower(keyword);
-    if (toLower(e.worked_on).find(kw) != std::string::npos) return true;
-    if (toLower(e.learned).find(kw)   != std::string::npos) return true;
-    if (toLower(e.blocked).find(kw)   != std::string::npos) return true;
-    if (toLower(e.tags).find(kw)      != std::string::npos) return true;
-    if (toLower(e.date).find(kw)      != std::string::npos) return true;
+    if (toLower(e.worked_on).find(kw)!= std::string::npos) return true;
+    if (toLower(e.learned).find(kw)!= std::string::npos) return true;
+    if (toLower(e.blocked).find(kw)!= std::string::npos) return true;
+    if (toLower(e.tags).find(kw)!= std::string::npos) return true;
+    if (toLower(e.date).find(kw)!= std::string::npos) return true;
     return false;
 }
 
-// NEW -- checks streak and mood, prints warnings after banner
+
 void checkReminders() {
     // --- Streak reminder ---
     std::string yesterday = addDays(getToday(), -1);
@@ -276,12 +274,12 @@ Entry readEntry(const std::string& filename) {
                       std::istreambuf_iterator<char>());
     file.close();
 
-    e.date      = parseField(json, "date");
+    e.date = parseField(json, "date");
     e.worked_on = parseField(json, "worked_on");
-    e.learned   = parseField(json, "learned");
-    e.blocked   = parseField(json, "blocked");
-    e.tags      = parseField(json, "tags");
-    e.mood      = parseMood(json);
+    e.learned = parseField(json, "learned");
+    e.blocked= parseField(json, "blocked");
+    e.tags= parseField(json, "tags");
+    e.mood= parseMood(json);
 
     return e;
 }
@@ -301,11 +299,11 @@ void readCommand(const std::string& date) {
     file.close();
 
     std::string displayDate = parseField(json, "date");
-    std::string workedOn    = parseField(json, "worked_on");
-    std::string learned     = parseField(json, "learned");
-    std::string blocked     = parseField(json, "blocked");
-    std::string tags        = parseField(json, "tags");
-    int mood                = parseMood(json);
+    std::string workedOn= parseField(json, "worked_on");
+    std::string learned= parseField(json, "learned");
+    std::string blocked= parseField(json, "blocked");
+    std::string tags = parseField(json, "tags");
+    int mood= parseMood(json);
 
     std::cout << "\n  \033[33m--- ENTRY | " << date << " ---\033[0m\n\n";
     std::cout << "  Date      : " << displayDate << "\n";
@@ -339,12 +337,12 @@ void newEntry() {
     std::cout << "\n  \033[33m--- DEV LOG | " << today << " | " << currentTime << " ---\033[0m\n\n";
 
     Entry e;
-    e.date      = today;
-    e.time      = currentTime;
+    e.date= today;
+    e.time= currentTime;
     e.worked_on = ask("What did you work on today?");
 
     if (e.worked_on.empty()) {
-        std::cout << "  \033[31m[x] worked_on cannot be empty. Entry cancelled.\033[0m\n\n";
+        std::cout << "  \033[31mError: worked_on cannot be empty. Entry cancelled.\033[0m\n\n";
         return;
     }
 
@@ -434,9 +432,9 @@ void listEntries() {
 
     std::sort(files.begin(), files.end());
 
-    int totalMood         = 0;
+    int totalMood = 0;
     std::string firstDate = "";
-    std::string lastDate  = "";
+    std::string lastDate= "";
     std::map<std::string, int> tagCount;
 
     std::cout << "\n  \033[33m------------------------------------------\033[0m\n";
@@ -455,9 +453,7 @@ void listEntries() {
         std::string tag;
         while (iss >> tag) tagCount[tag]++;
 
-        std::string moodBar = "";
-        for (int m = 0; m < e.mood; m++)  moodBar += "*";
-        for (int m = e.mood; m < 5; m++)  moodBar += "-";
+        std::string moodBar= moodToStars(e.mood);
 
         std::cout << "  \033[34m[" << i << "] " << e.date << "\033[0m\n";
         std::cout << "      Worked on : " << e.worked_on << "\n";
@@ -517,10 +513,7 @@ void searchEntries(const std::string& keyword) {
 
     int i = 1;
     for (const auto& e : matches) {
-        std::string moodBar = "";
-        for (int m = 0; m < e.mood; m++)  moodBar += "*";
-        for (int m = e.mood; m < 5; m++)  moodBar += "-";
-
+        std::string moodBar = moodToStars(e.mood);
         std::cout << "  \033[34m[" << i << "] " << e.date << "\033[0m\n";
         std::cout << "      Worked on : " << e.worked_on << "\n";
         std::cout << "      Learned   : " << e.learned   << "\n";
@@ -549,9 +542,9 @@ void showStats() {
     std::vector<Entry> entries;
     for (const auto& filename : files) entries.push_back(readEntry(filename));
 
-    int totalEntries     = entries.size();
-    int totalMood        = 0;
-    int bestMood         = 0;
+    int totalEntries = entries.size();
+    int totalMood = 0;
+    int bestMood = 0;
     std::string bestMoodDate = "";
     std::map<std::string, int> tagCount;
 
@@ -575,13 +568,13 @@ void showStats() {
         }
     }
 
-    int currentStreak = 0;
+    int Streak = 0;
     std::string checkDate = getToday();
     for (int i = 0; i < totalEntries; i++) {
         std::ifstream f("logs/" + checkDate + ".json");
         if (f.is_open()) {
             f.close();
-            currentStreak++;
+            Streak++;
             checkDate = addDays(checkDate, -1);
         } else break;
     }
@@ -603,7 +596,7 @@ void showStats() {
     std::cout << "  \033[33mDEV STATS\033[0m\n";
     std::cout << "  \033[33m------------------------------------------\033[0m\n\n";
     std::cout << "  Total entries   : " << totalEntries << "\n";
-    std::cout << "  Current streak  : " << currentStreak << " day(s)\n";
+    std::cout << "  Current streak  : " << Streak << " day(s)\n";
     std::cout << "  Longest streak  : " << longestStreak << " day(s)\n";
     std::cout << "  Best mood day   : " << bestMoodDate << " (" << bestMood << "/5)\n";
     std::cout << "  Most used tag   : " << topTag << " (" << topCount << " times)\n";
@@ -651,9 +644,7 @@ void showWeek() {
     int totalMood = 0;
     int i = 1;
     for (const auto& e : weekEntries) {
-        std::string moodBar = "";
-        for (int m = 0; m < e.mood; m++)  moodBar += "*";
-        for (int m = e.mood; m < 5; m++)  moodBar += "-";
+        std::string moodBar =moodToStars(e.mood);
 
         std::cout << "  \033[34m[" << i << "] " << e.date << "\033[0m";
         std::cout << "  Mood: [" << moodBar << "] " << e.mood << "/5\n";
@@ -761,7 +752,7 @@ int main(int argc, char* argv[]) {
 
     printBanner();
 
-    // NEW -- runs every time devlog starts
+
     checkReminders();
 
     if (argc < 2) {
@@ -796,11 +787,11 @@ int main(int argc, char* argv[]) {
     } else if (command == "week") {
         showWeek();
     } else if (command == "report") {
-        std::cout << "  [report] Coming on Day 15!\n\n";
+        std::cout << "  [report] Coming on Day 15!\n\n";//:html report generation
     } else if (command == "edit") {
        editEntry();
     } else {
-        std::cout << "  Unknown command: \"" << command << "\"\n";
+        std::cout << "  [?] Unknown command: \"" << command << "\"\n";
         std::cout << "  Run './devlog help' to see available commands.\n\n";
     }
 
