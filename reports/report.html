@@ -1,76 +1,100 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DEVLOG</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      background: rgb(13, 13, 13);
-      color: rgb(200, 200, 200);
-      font-family: 'Courier New', Courier, monospace;
-      font-size: clamp(13px, 1.6vw, 15px);
-      line-height: 1.6;
-      padding: 5vh 3vw;
-      min-height: 100vh;
-    }
-    .wrap {
-      width: 100%;
-    }
-    .hdr {
-      border: 1px solid rgb(51, 51, 51);
-      padding: clamp(14px, 3vw, 24px);
-      margin-bottom: clamp(20px, 4vw, 32px);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-    .hdr h1{
-      color: rgb(52, 211, 153);
-      font-size: clamp(22px, 5vw, 32px);
-      font-weight: normal;
-      letter-spacing: 3px;
-    }
-    .hdr h1 .cur {
-      display: inline-block;
-      width: 8px;
-      background: #34d399;
-      animation: blink 1s step-end infinite;
-    }
-    @keyframes blink { 50% { opacity: 0; } }
-    .ftr {
-      border-top: 1px solid #1a1a1a;
-      padding-top: 16px;
-      color: #333;
-      font-size: clamp(10px, 1.1vw, 11px);
-      text-align: center;
-      margin-top: clamp(20px, 4vw, 32px);
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DevLog — Report</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,700;1,300&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:       #08080d;
+    --bg2:      #0e0e18;
+    --bg3:      #131320;
+    --bg4:      #1a1a2e;
+    --border:   #1e1e35;
+    --border2:  #2a2a50;
+    --purple:   #9b6dff;
+    --purple2:  #7c4fe0;
+    --purple3:  #c4a0ff;
+    --purple4:  #e8d8ff;
+    --glow:     rgba(155,109,255,0.18);
+    --gray:     #5a5a78;
+    --gray2:    #8888a8;
+    --light:    #ccc8e8;
+    --white:    #eeeaff;
+    --green:    #4fffb0;
+    --red:      #ff6b8a;
+    --yellow:   #ffd166;
+    --cyan:     #67e8f9;
+  }
 
-    .ftr a {
-      color: #555;
-      text-decoration: none;
-    }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
 
-    .ftr a:hover { color: #c8860a; }
-  </style>
+  body {
+    background: var(--bg);
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--light);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* background */
+  .bg-layer {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .bg-blobs {
+    background:
+      radial-gradient(ellipse 70% 50% at 15% -5%,  rgba(120,60,220,0.22) 0%, transparent 55%),
+      radial-gradient(ellipse 50% 60% at 90% 110%, rgba(80,30,200,0.15)  0%, transparent 55%),
+      radial-gradient(ellipse 30% 30% at 60% 40%,  rgba(155,109,255,0.05) 0%, transparent 60%);
+  }
+
+  .bg-dots {
+    background-image: radial-gradient(rgba(155,109,255,0.18) 1px, transparent 1px);
+    background-size: 28px 28px;
+    mask-image: radial-gradient(ellipse 90% 70% at 50% 0%, black 20%, transparent 80%);
+  }
+
+  .bg-scan {
+    background: repeating-linear-gradient(
+      0deg, transparent, transparent 3px,
+      rgba(0,0,0,0.06) 3px, rgba(0,0,0,0.06) 4px
+    );
+  }
+
+  .bg-grain {
+    opacity: 0.022;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /*layout*/
+  .wrap {
+    width: 100%;
+    padding: 0 3vw 100px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* PLACEHOLDER — rest of CSS goes here in coming days */
+
+</style>
 </head>
 <body>
-  <div class="wrap">
 
-    <div class="hdr">
-      <h1>&gt; DEVLOG<span class="cur">&nbsp;</span></h1>
-    </div>
 
-    <div class="ftr">
-  devlog v1.0 &middot; <a href="https://github.com/anshrjpt/DEV-LOG">github</a>
-  &middot;
-  <a href="https://github.com/mishika-agarwal-1111">mishika</a>
+<div class="bg-layer bg-blobs"></div>
+<div class="bg-layer bg-dots"></div>
+<div class="bg-layer bg-scan"></div>
+<div class="bg-layer bg-grain"></div>
+
+<div class="wrap">
+  <!--content goes here in coming days -->
 </div>
 
-  </div>
 </body>
 </html>
