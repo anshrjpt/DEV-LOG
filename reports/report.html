@@ -220,12 +220,131 @@
     margin-top: 8px;
     letter-spacing: 1px;
   }
+/* MAIN GRID */
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 16px;
+    animation: fadeUp 0.7s cubic-bezier(0.16,1,0.3,1) 0.2s both;
+  }
 
+  /* SECTION HEADING */
+  .sec-head {
+    font-size: 0.58rem;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--gray);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .sec-head .num { color: var(--purple2); }
+  .sec-head::after {
+    content: '';
+    flex: 1; height: 1px;
+    background: linear-gradient(90deg, var(--border2), transparent);
+  }
+
+  /* ENTRY CARDS */
+  .timeline { display: flex; flex-direction: column; gap: 10px; }
+
+  .card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 22px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.25s, border-color 0.25s, box-shadow 0.25s;
+    animation: fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) both;
+  }
+  .card:nth-child(1){animation-delay:0.28s}
+  .card:nth-child(2){animation-delay:0.35s}
+  .card:nth-child(3){animation-delay:0.42s}
+  .card:nth-child(4){animation-delay:0.49s}
+  .card:nth-child(5){animation-delay:0.56s}
+
+  .card:hover {
+    transform: translateX(6px);
+    border-color: var(--border2);
+    box-shadow: -6px 0 40px rgba(155,109,255,0.1), 0 10px 40px rgba(0,0,0,0.4);
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 15%; bottom: 15%;
+    width: 2px;
+    background: linear-gradient(180deg, transparent, var(--purple), transparent);
+    border-radius: 2px;
+    opacity: 0;
+    transition: opacity 0.25s, top 0.25s, bottom 0.25s;
+  }
+  .card:hover::before { opacity: 1; top: 5%; bottom: 5%; }
+
+  .card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 50% 40% at 100% 0%, rgba(155,109,255,0.07) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 50% at 0% 100%, rgba(155,109,255,0.04) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .card-date {
+    font-size: 0.58rem;
+    letter-spacing: 3px;
+    color: var(--purple3);
+    text-transform: uppercase;
+  }
+  .card-time {
+    color: var(--gray);
+    letter-spacing: 1px;
+    margin-left: 6px;
+  }
+
+  .pips { display: flex; gap: 4px; align-items: center; }
+  .pip {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--border2);
+  }
+  .pip.on {
+    background: var(--purple);
+    box-shadow: 0 0 8px rgba(155,109,255,0.7);
+  }
+  .pip-lbl { font-size: 0.48rem; color: var(--gray); margin-left: 6px; letter-spacing: 1px; }
+
+  .card-body { display: flex; flex-direction: column; gap: 11px; }
+
+  .field-k {
+    font-size: 0.43rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gray);
+    margin-bottom: 4px;
+  }
+  .field-v {
+    font-size: 0.7rem;
+    color: var(--light);
+    line-height: 1.65;
+    font-weight: 300;
+  }
+  .field-v.blocked { color: var(--red); }
 </style>
 </head>
 <body>
-
-
 <div class="bg-layer bg-blobs"></div>
 <div class="bg-layer bg-dots"></div>
 <div class="bg-layer bg-scan"></div>
@@ -268,7 +387,87 @@
     <div class="stat-sub">days blocked</div>
   </div>
 </div>
+  <!-- MAIN GRID -->
+  <div class="grid">
+    <div>
+      <div class="sec-head"><span class="num">01</span> entry timeline</div>
+      <div class="timeline">
 
+        <div class="card">
+          <div class="card-top">
+            <div class="card-date">2026-03-05 <span class="card-time">14:30</span></div>
+            <div class="pips">
+              <div class="pip on"></div><div class="pip on"></div><div class="pip on"></div><div class="pip on"></div><div class="pip"></div>
+              <div class="pip-lbl">4/5</div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div><div class="field-k">worked on</div><div class="field-v">built the json parsing feature using find() and substr()</div></div>
+            <div><div class="field-k">learned</div><div class="field-v">how string manipulation works in C++ and why npos is returned when find() fails</div></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-top">
+            <div class="card-date">2026-03-04 <span class="card-time">18:15</span></div>
+            <div class="pips">
+              <div class="pip on"></div><div class="pip on"></div><div class="pip on"></div><div class="pip on"></div><div class="pip on"></div>
+              <div class="pip-lbl">5/5</div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div><div class="field-k">worked on</div><div class="field-v">switched from .txt to .json format for saving entries</div></div>
+            <div><div class="field-k">learned</div><div class="field-v">how to manually write json using ofstream without any external library</div></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-top">
+            <div class="card-date">2026-03-03 <span class="card-time">21:45</span></div>
+            <div class="pips">
+              <div class="pip on"></div><div class="pip on"></div><div class="pip on"></div><div class="pip"></div><div class="pip"></div>
+              <div class="pip-lbl">3/5</div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div><div class="field-k">worked on</div><div class="field-v">saving entries to logs/ folder as dated files</div></div>
+            <div><div class="field-k">learned</div><div class="field-v">how ofstream works and how mkdir creates folders automatically in C++</div></div>
+            <div><div class="field-k">blocked</div><div class="field-v blocked">mkdir not working on Windows — needed #ifdef cross-platform fix</div></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-top">
+            <div class="card-date">2026-03-02 <span class="card-time">16:00</span></div>
+            <div class="pips">
+              <div class="pip on"></div><div class="pip on"></div><div class="pip on"></div><div class="pip on"></div><div class="pip"></div>
+              <div class="pip-lbl">4/5</div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div><div class="field-k">worked on</div><div class="field-v">user input system with getline and the ask() helper function</div></div>
+            <div><div class="field-k">learned</div><div class="field-v">ANSI escape codes for terminal colors and how structs work in C++</div></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-top">
+            <div class="card-date">2026-03-01 <span class="card-time">11:20</span></div>
+            <div class="pips">
+              <div class="pip on"></div><div class="pip on"></div><div class="pip on"></div><div class="pip"></div><div class="pip"></div>
+              <div class="pip-lbl">3/5</div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div><div class="field-k">worked on</div><div class="field-v">project setup, folder structure, first main.cpp with hello devlog</div></div>
+            <div><div class="field-k">learned</div><div class="field-v">how to compile C++ with g++ and set up VS Code for development</div></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <!-- sidebar goes here Day 4 -->
+  </div>
 
 </div>
 
