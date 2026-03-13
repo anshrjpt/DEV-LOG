@@ -146,6 +146,81 @@
 
   @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
+  /* STAT CARDS */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin: 36px 0 28px;
+    animation: fadeUp 0.7s cubic-bezier(0.16,1,0.3,1) 0.1s both;
+  }
+
+  .stat {
+    border-radius: 14px;
+    padding: 24px 20px 20px;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    background: var(--bg2);
+    transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
+  }
+
+  .stat:hover {
+    transform: translateY(-4px);
+    border-color: var(--border2);
+  }
+
+  .stat::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 15%; right: 15%;
+    height: 1px;
+  }
+  .stat.s1::before { background: linear-gradient(90deg, transparent, var(--purple), transparent); box-shadow: 0 0 12px var(--purple); }
+  .stat.s2::before { background: linear-gradient(90deg, transparent, var(--green), transparent);  box-shadow: 0 0 12px var(--green); }
+  .stat.s3::before { background: linear-gradient(90deg, transparent, var(--yellow), transparent); box-shadow: 0 0 12px var(--yellow); }
+  .stat.s4::before { background: linear-gradient(90deg, transparent, var(--red), transparent);    box-shadow: 0 0 12px var(--red); }
+
+  .stat:hover.s1 { box-shadow: 0 8px 40px rgba(155,109,255,0.12); }
+  .stat:hover.s2 { box-shadow: 0 8px 40px rgba(79,255,176,0.10); }
+  .stat:hover.s3 { box-shadow: 0 8px 40px rgba(255,209,102,0.10); }
+  .stat:hover.s4 { box-shadow: 0 8px 40px rgba(255,107,138,0.10); }
+
+  .stat::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(155,109,255,0.07) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .stat-lbl {
+    font-size: 0.58rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gray);
+    margin-bottom: 14px;
+  }
+
+  .stat-val {
+    font-family: 'Syne', sans-serif;
+    font-size: 2.8rem;
+    font-weight: 800;
+    letter-spacing: -2px;
+    line-height: 1;
+  }
+  .stat-val.v1 { color: var(--purple); text-shadow: 0 0 40px rgba(155,109,255,0.5); }
+  .stat-val.v2 { color: var(--green);  text-shadow: 0 0 40px rgba(79,255,176,0.4); }
+  .stat-val.v3 { color: var(--yellow); text-shadow: 0 0 40px rgba(255,209,102,0.4); }
+  .stat-val.v4 { color: var(--red);    text-shadow: 0 0 40px rgba(255,107,138,0.4); }
+
+  .stat-sub {
+    font-size: 0.56rem;
+    color: var(--gray);
+    margin-top: 8px;
+    letter-spacing: 1px;
+  }
+
 </style>
 </head>
 <body>
@@ -169,6 +244,32 @@
     </div>
     <div class="header-line"></div>
   </div>
+
+<!--stats-->
+<div class="stats">
+  <div class="stat s1">
+    <div class="stat-lbl">total entries</div>
+    <div class="stat-val v1">24</div>
+    <div class="stat-sub">days logged</div>
+  </div>
+  <div class="stat s2">
+    <div class="stat-lbl">streak</div>
+    <div class="stat-val v2">7</div>
+    <div class="stat-sub">consecutive days</div>
+  </div>
+  <div class="stat s3">
+    <div class="stat-lbl">avg mood</div>
+    <div class="stat-val v3">3.8</div>
+    <div class="stat-sub">out of 5.0</div>
+  </div>
+  <div class="stat s4">
+    <div class="stat-lbl">blockers</div>
+    <div class="stat-val v4">5</div>
+    <div class="stat-sub">days blocked</div>
+  </div>
+</div>
+
+
 </div>
 
 </body>
