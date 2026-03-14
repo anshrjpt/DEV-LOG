@@ -80,7 +80,7 @@
     z-index: 1;
   }
 
-  /* HEADER */
+  /* header*/
   .header {
     padding: 60px 0 48px;
     display: flex;
@@ -146,7 +146,7 @@
 
   @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
-  /* STAT CARDS */
+  /* stat card */
   .stats {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -220,7 +220,7 @@
     margin-top: 8px;
     letter-spacing: 1px;
   }
-/* MAIN GRID */
+/* main grid */
   .grid {
     display: grid;
     grid-template-columns: 1fr 320px;
@@ -228,7 +228,7 @@
     animation: fadeUp 0.7s cubic-bezier(0.16,1,0.3,1) 0.2s both;
   }
 
-  /* SECTION HEADING */
+  /* sec. heading */
   .sec-head {
     font-size: 0.58rem;
     letter-spacing: 4px;
@@ -246,7 +246,7 @@
     background: linear-gradient(90deg, var(--border2), transparent);
   }
 
-  /* ENTRY CARDS */
+  /* entry card */
   .timeline { display: flex; flex-direction: column; gap: 10px; }
 
   .card {
@@ -342,6 +342,61 @@
     font-weight: 300;
   }
   .field-v.blocked { color: var(--red); }
+  /* card footer */
+  .card-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+  }
+
+  .tags { display: flex; flex-wrap: wrap; gap: 5px; }
+  .tag {
+    font-size: 0.47rem;
+    padding: 3px 10px;
+    border-radius: 20px;
+    background: rgba(155,109,255,0.07);
+    border: 1px solid rgba(155,109,255,0.18);
+    color: var(--purple3);
+    letter-spacing: 1px;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .tag:hover { background: rgba(155,109,255,0.15); border-color: rgba(155,109,255,0.4); }
+
+  .blocked-tag {
+    font-size: 0.43rem;
+    padding: 3px 10px;
+    border-radius: 20px;
+    background: rgba(255,107,138,0.07);
+    border: 1px solid rgba(255,107,138,0.22);
+    color: var(--red);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  /* sidebar */
+  .sidebar { display: flex; flex-direction: column; gap: 12px; }
+
+  .sc {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.25s;
+  }
+  .sc:hover { border-color: var(--border2); }
+
+  .sc::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 100% 50% at 50% 0%, rgba(155,109,255,0.06) 0%, transparent 65%);
+    pointer-events: none;
+  }
 </style>
 </head>
 <body>
@@ -351,7 +406,7 @@
 <div class="bg-layer bg-grain"></div>
 
 <div class="wrap">
-<!-- HEADER -->
+<!-- header-->
   <div class="header">
     <div>
       <h1>Dev<span class="hollow">Log</span></h1>
@@ -387,7 +442,7 @@
     <div class="stat-sub">days blocked</div>
   </div>
 </div>
-  <!-- MAIN GRID -->
+  <!-- main grid -->
   <div class="grid">
     <div>
       <div class="sec-head"><span class="num">01</span> entry timeline</div>
@@ -399,6 +454,9 @@
             <div class="pips">
               <div class="pip on"></div><div class="pip on"></div><div class="pip on"></div><div class="pip on"></div><div class="pip"></div>
               <div class="pip-lbl">4/5</div>
+              <div class="card-foot">
+            <div class="tags"><span class="tag">cpp</span><span class="tag">json</span><span class="tag">parsing</span><span class="tag">foss</span></div>
+          </div>
             </div>
           </div>
           <div class="card-body">
@@ -413,6 +471,9 @@
             <div class="pips">
               <div class="pip on"></div><div class="pip on"></div><div class="pip on"></div><div class="pip on"></div><div class="pip on"></div>
               <div class="pip-lbl">5/5</div>
+              <div class="card-foot">
+            <div class="tags"><span class="tag">cpp</span><span class="tag">json</span><span class="tag">foss</span><span class="tag">devlog</span></div>
+          </div>
             </div>
           </div>
           <div class="card-body">
@@ -427,6 +488,10 @@
             <div class="pips">
               <div class="pip on"></div><div class="pip on"></div><div class="pip on"></div><div class="pip"></div><div class="pip"></div>
               <div class="pip-lbl">3/5</div>
+              <div class="card-foot">
+            <div class="tags"><span class="tag">cpp</span><span class="tag">files</span><span class="tag">windows</span><span class="tag">bugfix</span></div>
+            <span class="blocked-tag">blocked</span>
+          </div>
             </div>
           </div>
           <div class="card-body">
@@ -442,6 +507,9 @@
             <div class="pips">
               <div class="pip on"></div><div class="pip on"></div><div class="pip on"></div><div class="pip on"></div><div class="pip"></div>
               <div class="pip-lbl">4/5</div>
+              <div class="card-foot">
+            <div class="tags"><span class="tag">cpp</span><span class="tag">cli</span><span class="tag">ansi</span><span class="tag">structs</span></div>
+          </div>
             </div>
           </div>
           <div class="card-body">
@@ -456,6 +524,9 @@
             <div class="pips">
               <div class="pip on"></div><div class="pip on"></div><div class="pip on"></div><div class="pip"></div><div class="pip"></div>
               <div class="pip-lbl">3/5</div>
+              <div class="card-foot">
+            <div class="tags"><span class="tag">cpp</span><span class="tag">setup</span><span class="tag">vscode</span><span class="tag">foss</span></div>
+          </div>
             </div>
           </div>
           <div class="card-body">
