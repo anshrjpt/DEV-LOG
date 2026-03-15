@@ -449,6 +449,34 @@
     justify-content: flex-end;
   }
   .al { width: 7px; height: 7px; border-radius: 2px; }
+
+  /* MOOD CHART */
+  .mood-bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 5px;
+    height: 70px;
+    margin-top: 10px;
+  }
+  .mb-wrap {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    height: 100%;
+    justify-content: flex-end;
+  }
+  .mb {
+    width: 100%;
+    border-radius: 3px 3px 0 0;
+    background: linear-gradient(180deg, var(--purple3) 0%, var(--purple2) 100%);
+    box-shadow: 0 0 10px rgba(155,109,255,0.3);
+    transition: box-shadow 0.2s;
+    min-height: 4px;
+  }
+  .mb-wrap:hover .mb { box-shadow: 0 0 18px rgba(155,109,255,0.6); }
+  .mb-lbl { font-size: 0.4rem; color: var(--gray); }
 </style>
 </head>
 <body>
@@ -623,7 +651,21 @@
           more
         </div>
       </div>
-      <!-- mood, tags, summary-->
+      <div class="sc">
+        <div class="sec-head"><span class="num">03</span> mood trend</div>
+        <div class="mood-bars">
+          <div class="mb-wrap"><div class="mb" style="height:60%"></div><div class="mb-lbl">M</div></div>
+          <div class="mb-wrap"><div class="mb" style="height:80%"></div><div class="mb-lbl">T</div></div>
+          <div class="mb-wrap"><div class="mb" style="height:40%"></div><div class="mb-lbl">W</div></div>
+          <div class="mb-wrap"><div class="mb" style="height:100%"></div><div class="mb-lbl">T</div></div>
+          <div class="mb-wrap"><div class="mb" style="height:60%"></div><div class="mb-lbl">F</div></div>
+          <div class="mb-wrap"><div class="mb" style="height:80%"></div><div class="mb-lbl">S</div></div>
+          <div class="mb-wrap"><div class="mb" style="height:80%"></div><div class="mb-lbl">S</div></div>
+        </div>
+        <div style="margin-top:10px;font-size:0.5rem;color:var(--gray);letter-spacing:1px">
+          <span style="color:var(--purple3)">2026-03-02 — 2026-03-08</span> &nbsp; avg — <span style="color:var(--yellow)">3.8 / 5</span>
+        </div>
+      </div>
     </div>
   </div>
 
