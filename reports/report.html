@@ -397,6 +397,58 @@
     background: radial-gradient(ellipse 100% 50% at 50% 0%, rgba(155,109,255,0.06) 0%, transparent 65%);
     pointer-events: none;
   }
+  /* ACTIVITY GRID */
+  .act-wrap { margin-top: 10px; }
+  .act-month-title {
+    font-size: 0.48rem;
+    color: var(--purple3);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .act-day-row {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 3px;
+    margin-bottom: 3px;
+  }
+  .act-day-hdr {
+    font-size: 0.36rem;
+    color: var(--gray);
+    text-align: center;
+    letter-spacing: 0.5px;
+  }
+  .act-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 3px;
+  }
+  .ac {
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 2px;
+    background: var(--bg3);
+    transition: transform 0.15s;
+  }
+  .ac.empty { visibility: hidden; }
+  .ac:hover { transform: scale(1.4); z-index: 2; position: relative; }
+  .ac.a0 { background: var(--bg3); }
+  .ac.a1 { background: rgba(155,109,255,0.10); }
+  .ac.a2 { background: rgba(155,109,255,0.22); }
+  .ac.a3 { background: rgba(155,109,255,0.40); }
+  .ac.a4 { background: rgba(155,109,255,0.60); box-shadow: 0 0 4px rgba(155,109,255,0.2); }
+
+  .act-legend {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    margin-top: 10px;
+    font-size: 0.42rem;
+    color: var(--gray);
+    letter-spacing: 1px;
+    justify-content: flex-end;
+  }
+  .al { width: 7px; height: 7px; border-radius: 2px; }
 </style>
 </head>
 <body>
@@ -537,7 +589,42 @@
 
       </div>
     </div>
-    <!-- sidebar goes here Day 4 -->
+   <!--sidebar-->
+    <div class="sidebar">
+      <div class="sc">
+        <div class="sec-head"><span class="num">02</span> activity</div>
+        <div class="act-wrap">
+          <div class="act-month-title">February</div>
+          <div class="act-day-row">
+            <div class="act-day-hdr">M</div><div class="act-day-hdr">T</div><div class="act-day-hdr">W</div><div class="act-day-hdr">T</div><div class="act-day-hdr">F</div><div class="act-day-hdr">S</div><div class="act-day-hdr">S</div>
+          </div>
+          <div class="act-grid">
+            <div class="ac empty"></div><div class="ac empty"></div><div class="ac empty"></div><div class="ac empty"></div><div class="ac empty"></div><div class="ac empty"></div><div class="ac a0"></div>
+            <div class="ac a0"></div><div class="ac a1"></div><div class="ac a0"></div><div class="ac a0"></div><div class="ac a1"></div><div class="ac a0"></div><div class="ac a0"></div>
+            <div class="ac a1"></div><div class="ac a3"></div><div class="ac a0"></div><div class="ac a2"></div><div class="ac a1"></div><div class="ac a0"></div><div class="ac a2"></div>
+            <div class="ac a4"></div><div class="ac a1"></div><div class="ac a3"></div><div class="ac a4"></div><div class="ac a0"></div><div class="ac a1"></div><div class="ac a2"></div>
+            <div class="ac a1"></div><div class="ac a0"></div><div class="ac a4"></div><div class="ac a2"></div><div class="ac a1"></div><div class="ac a3"></div><div class="ac empty"></div>
+          </div>
+          <div class="act-month-title" style="margin-top:12px">March</div>
+          <div class="act-day-row">
+            <div class="act-day-hdr">M</div><div class="act-day-hdr">T</div><div class="act-day-hdr">W</div><div class="act-day-hdr">T</div><div class="act-day-hdr">F</div><div class="act-day-hdr">S</div><div class="act-day-hdr">S</div>
+          </div>
+          <div class="act-grid">
+            <div class="ac empty"></div><div class="ac empty"></div><div class="ac empty"></div><div class="ac empty"></div><div class="ac empty"></div><div class="ac empty"></div><div class="ac a4"></div>
+            <div class="ac a3"></div><div class="ac a4"></div><div class="ac a4"></div><div class="ac a4"></div><div class="ac a0"></div><div class="ac a0"></div><div class="ac a0"></div>
+          </div>
+        </div>
+        <div class="act-legend">
+          less
+          <div class="al" style="background:var(--bg3)"></div>
+          <div class="al" style="background:rgba(155,109,255,0.2)"></div>
+          <div class="al" style="background:rgba(155,109,255,0.45)"></div>
+          <div class="al" style="background:rgba(155,109,255,0.6)"></div>
+          more
+        </div>
+      </div>
+      <!-- mood, tags, summary-->
+    </div>
   </div>
 
 </div>
