@@ -145,6 +145,8 @@
   }
 
   @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  @keyframes fadeDown { from { opacity:0; transform:translateY(-20px) } to { opacity:1; transform:translateY(0) } }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(20px) } to { opacity:1; transform:translateY(0) } }
 
   /* stat card */
   .stats {
@@ -477,6 +479,35 @@
   }
   .mb-wrap:hover .mb { box-shadow: 0 0 18px rgba(155,109,255,0.6); }
   .mb-lbl { font-size: 0.4rem; color: var(--gray); }
+
+  /* tag bars */
+  .tag-rows { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+  .tr { display: flex; align-items: center; gap: 8px; }
+  .tr-n { font-size: 0.52rem; color: var(--light); width: 65px; flex-shrink: 0; }
+  .tr-bg { flex: 1; height: 3px; background: var(--bg3); border-radius: 2px; overflow: hidden; }
+  .tr-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--purple2), var(--purple3));
+    box-shadow: 0 0 6px rgba(155,109,255,0.4);
+    border-radius: 2px;
+  }
+  .tr-c { font-size: 0.48rem; color: var(--gray); width: 16px; text-align: right; flex-shrink: 0; }
+
+  /* summary */
+  .sum-rows { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
+  .sr {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 7px 10px;
+    border-radius: 7px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    font-size: 0.52rem;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .sr:hover { border-color: var(--border2); background: var(--bg4); }
+  .sr-k { color: var(--gray); letter-spacing: 1px; }
 </style>
 </head>
 <body>
@@ -534,14 +565,14 @@
             <div class="pips">
               <div class="pip on"></div><div class="pip on"></div><div class="pip on"></div><div class="pip on"></div><div class="pip"></div>
               <div class="pip-lbl">4/5</div>
-              <div class="card-foot">
-            <div class="tags"><span class="tag">cpp</span><span class="tag">json</span><span class="tag">parsing</span><span class="tag">foss</span></div>
-          </div>
             </div>
           </div>
           <div class="card-body">
             <div><div class="field-k">worked on</div><div class="field-v">built the json parsing feature using find() and substr()</div></div>
             <div><div class="field-k">learned</div><div class="field-v">how string manipulation works in C++ and why npos is returned when find() fails</div></div>
+          </div>
+          <div class="card-foot">
+            <div class="tags"><span class="tag">cpp</span><span class="tag">json</span><span class="tag">parsing</span><span class="tag">foss</span></div>
           </div>
         </div>
 
@@ -551,14 +582,14 @@
             <div class="pips">
               <div class="pip on"></div><div class="pip on"></div><div class="pip on"></div><div class="pip on"></div><div class="pip on"></div>
               <div class="pip-lbl">5/5</div>
-              <div class="card-foot">
-            <div class="tags"><span class="tag">cpp</span><span class="tag">json</span><span class="tag">foss</span><span class="tag">devlog</span></div>
-          </div>
             </div>
           </div>
           <div class="card-body">
             <div><div class="field-k">worked on</div><div class="field-v">switched from .txt to .json format for saving entries</div></div>
             <div><div class="field-k">learned</div><div class="field-v">how to manually write json using ofstream without any external library</div></div>
+          </div>
+          <div class="card-foot">
+            <div class="tags"><span class="tag">cpp</span><span class="tag">json</span><span class="tag">foss</span><span class="tag">devlog</span></div>
           </div>
         </div>
 
@@ -568,16 +599,16 @@
             <div class="pips">
               <div class="pip on"></div><div class="pip on"></div><div class="pip on"></div><div class="pip"></div><div class="pip"></div>
               <div class="pip-lbl">3/5</div>
-              <div class="card-foot">
-            <div class="tags"><span class="tag">cpp</span><span class="tag">files</span><span class="tag">windows</span><span class="tag">bugfix</span></div>
-            <span class="blocked-tag">blocked</span>
-          </div>
             </div>
           </div>
           <div class="card-body">
             <div><div class="field-k">worked on</div><div class="field-v">saving entries to logs/ folder as dated files</div></div>
             <div><div class="field-k">learned</div><div class="field-v">how ofstream works and how mkdir creates folders automatically in C++</div></div>
             <div><div class="field-k">blocked</div><div class="field-v blocked">mkdir not working on Windows — needed #ifdef cross-platform fix</div></div>
+          </div>
+          <div class="card-foot">
+            <div class="tags"><span class="tag">cpp</span><span class="tag">files</span><span class="tag">windows</span><span class="tag">bugfix</span></div>
+            <span class="blocked-tag">blocked</span>
           </div>
         </div>
 
@@ -587,14 +618,14 @@
             <div class="pips">
               <div class="pip on"></div><div class="pip on"></div><div class="pip on"></div><div class="pip on"></div><div class="pip"></div>
               <div class="pip-lbl">4/5</div>
-              <div class="card-foot">
-            <div class="tags"><span class="tag">cpp</span><span class="tag">cli</span><span class="tag">ansi</span><span class="tag">structs</span></div>
-          </div>
             </div>
           </div>
           <div class="card-body">
             <div><div class="field-k">worked on</div><div class="field-v">user input system with getline and the ask() helper function</div></div>
             <div><div class="field-k">learned</div><div class="field-v">ANSI escape codes for terminal colors and how structs work in C++</div></div>
+          </div>
+          <div class="card-foot">
+            <div class="tags"><span class="tag">cpp</span><span class="tag">cli</span><span class="tag">ansi</span><span class="tag">structs</span></div>
           </div>
         </div>
 
@@ -604,14 +635,14 @@
             <div class="pips">
               <div class="pip on"></div><div class="pip on"></div><div class="pip on"></div><div class="pip"></div><div class="pip"></div>
               <div class="pip-lbl">3/5</div>
-              <div class="card-foot">
-            <div class="tags"><span class="tag">cpp</span><span class="tag">setup</span><span class="tag">vscode</span><span class="tag">foss</span></div>
-          </div>
             </div>
           </div>
           <div class="card-body">
             <div><div class="field-k">worked on</div><div class="field-v">project setup, folder structure, first main.cpp with hello devlog</div></div>
             <div><div class="field-k">learned</div><div class="field-v">how to compile C++ with g++ and set up VS Code for development</div></div>
+          </div>
+          <div class="card-foot">
+            <div class="tags"><span class="tag">cpp</span><span class="tag">setup</span><span class="tag">vscode</span><span class="tag">foss</span></div>
           </div>
         </div>
 
@@ -666,9 +697,30 @@
           <span style="color:var(--purple3)">2026-03-02 — 2026-03-08</span> &nbsp; avg — <span style="color:var(--yellow)">3.8 / 5</span>
         </div>
       </div>
+      <div class="sc">
+        <div class="sec-head"><span class="num">04</span> top tags</div>
+        <div class="tag-rows">
+          <div class="tr"><div class="tr-n">cpp</div><div class="tr-bg"><div class="tr-fill" style="width:100%"></div></div><div class="tr-c">24</div></div>
+          <div class="tr"><div class="tr-n">foss</div><div class="tr-bg"><div class="tr-fill" style="width:75%"></div></div><div class="tr-c">18</div></div>
+          <div class="tr"><div class="tr-n">json</div><div class="tr-bg"><div class="tr-fill" style="width:42%"></div></div><div class="tr-c">10</div></div>
+          <div class="tr"><div class="tr-n">bugfix</div><div class="tr-bg"><div class="tr-fill" style="width:25%"></div></div><div class="tr-c">6</div></div>
+          <div class="tr"><div class="tr-n">cli</div><div class="tr-bg"><div class="tr-fill" style="width:20%"></div></div><div class="tr-c">5</div></div>
+        </div>
+      </div>
+      <div class="sc">
+        <div class="sec-head"><span class="num">05</span> summary</div>
+        <div class="sum-rows">
+          <div class="sr"><span class="sr-k">total entries</span><span style="color:var(--purple3)">24</span></div>
+          <div class="sr"><span class="sr-k">days blocked</span><span style="color:var(--red)">5</span></div>
+          <div class="sr"><span class="sr-k">best mood day</span><span style="color:var(--green)">2026-03-04 (5/5)</span></div>
+          <div class="sr"><span class="sr-k">best streak</span><span style="color:var(--green)">7 days</span></div>
+          <div class="sr"><span class="sr-k">avg mood</span><span style="color:var(--yellow)">3.8 / 5</span></div>
+          <div class="sr"><span class="sr-k">unique tags</span><span style="color:var(--purple3)">12</span></div>
+          <div class="sr"><span class="sr-k">this month</span><span style="color:var(--cyan)">24 days</span></div>
+        </div>
+      </div>
     </div>
   </div>
-
 </div>
 
 </body>
