@@ -508,6 +508,38 @@
   }
   .sr:hover { border-color: var(--border2); background: var(--bg4); }
   .sr-k { color: var(--gray); letter-spacing: 1px; }
+    .footer {
+    margin-top: 56px;
+    padding-top: 28px;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation: fadeUp 0.6s ease 0.5s both;
+  }
+  .footer::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent 0%, var(--purple) 50%, transparent 100%);
+    box-shadow: 0 0 16px rgba(155,109,255,0.3);
+  }
+  .footer-center {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.52rem;
+    color: var(--gray);
+    letter-spacing: 1.5px;
+  }
+  .footer-center a {
+    color: var(--purple3);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .footer-center a:hover { color: var(--purple); }
+  .footer-sep { color: var(--border2); }
 </style>
 </head>
 <body>
@@ -722,6 +754,17 @@
     </div>
   </div>
 </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <div class="footer-center">
+      devlog v1.0
+      <span class="footer-sep">&middot;</span>
+      <a href="https://github.com/anshrjpt/DEV-LOG">github</a>
+      <span class="footer-sep">&middot;</span>
+      <a href="https://github.com/mishika-agarwal-1111">mishika</a>
+    </div>
+  </div>
 
 </body>
 </html>
