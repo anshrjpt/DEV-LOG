@@ -790,7 +790,6 @@
       </div>
     </div>
   </div>
-</div>
 
   <!-- FOOTER -->
   <div class="footer">
@@ -803,5 +802,158 @@
     </div>
   </div>
 
+</div>
+<script>
+  const logs = [
+    {
+      date: "2026-03-05",
+      time: "14:30",
+      worked_on: "built the json parsing feature using find() and substr()",
+      learned: "how string manipulation works in C++ and why npos is returned when find() fails",
+      blocked: null,
+      tags: ["cpp", "json", "parsing", "foss"],
+      mood: 4
+    },
+    {
+      date: "2026-03-04",
+      time: "18:15",
+      worked_on: "switched from .txt to .json format for saving entries",
+      learned: "how to manually write json using ofstream without any external library",
+      blocked: null,
+      tags: ["cpp", "json", "foss", "devlog"],
+      mood: 5
+    },
+    {
+      date: "2026-03-03",
+      time: "21:45",
+      worked_on: "saving entries to logs/ folder as dated files",
+      learned: "how ofstream works and how mkdir creates folders automatically in C++",
+      blocked: "mkdir not working on Windows — needed #ifdef cross-platform fix",
+      tags: ["cpp", "files", "windows", "bugfix"],
+      mood: 3
+    },
+    {
+      date: "2026-03-02",
+      time: "16:00",
+      worked_on: "user input system with getline and the ask() helper function",
+      learned: "ANSI escape codes for terminal colors and how structs work in C++",
+      blocked: null,
+      tags: ["cpp", "cli", "ansi", "structs"],
+      mood: 4
+    },
+    {
+      date: "2026-03-01",
+      time: "11:20",
+      worked_on: "project setup, folder structure, first main.cpp with hello devlog",
+      learned: "how to compile C++ with g++ and set up VS Code for development",
+      blocked: null,
+      tags: ["cpp", "setup", "vscode", "foss"],
+      mood: 3
+    }
+  ];
+
+  // ── STATS ──
+  const total = logs.length;
+  const moods = logs.map(l => l.mood);
+  const avgMood = (moods.reduce((a, b) => a + b, 0) / total).toFixed(1);
+  const blockers = logs.filter(l => l.blocked).length;
+
+  // streak calculation
+  let streak = 1;
+  const sorted = [...logs].sort((a, b) => new Date(b.date) - new Date(a.date));
+  for (let i = 0; i < sorted.length - 1; i++) {
+    const curr = new Date(sorted[i].date);
+    const prev = new Date(sorted[i + 1].date);
+    const diff = (curr - prev) / (1000 * 60 * 60 * 24);
+    if (diff === 1) streak++;
+    else break;
+  }
+
+  // inject stats
+  document.querySelector('.stat.s1 .stat-val').textContent = total;
+  document.querySelector('.stat.s1 .stat-sub').textContent = sorted[sorted.length-1].date + ' to ' + sorted[0].date;
+  document.querySelector('.stat.s2 .stat-val').textContent = streak;
+  document.querySelector('.stat.s3 .stat-val').textContent = avgMood;
+  document.querySelector('.stat.s4 .stat-val').textContent = blockers;
+
+  // header chips
+  const chips = document.querySelectorAll('.chip');
+  chips[1].innerHTML = `<span style="color:var(--purple3)">${total}</span> &nbsp;entries`;
+  chips[2].innerHTML = `<span style="color:var(--green)">${streak}</span> &nbsp;day streak`;
+
+  // ── ENTRY CARDS ──
+  const timeline = document.querySelector('.timeline');
+  timeline.innerHTML = logs.map((l, i) => {
+    const pips = [1,2,3,4,5].map(n =>
+      `<div class="pip ${n <= l.mood ? 'on' : ''}"></div>`
+    ).join('');
+
+    const tags = l.tags.map(t => `<span class="tag">${t}</span>`).join('');
+    const blockedRow = l.blocked
+      ? `<div><div class="field-k">blocked</div><div class="field-v blocked">${l.blocked}</div></div>`
+      : '';
+    const blockedTag = l.blocked ? `<span class="blocked-tag">blocked</span>` : '';
+
+    return `
+      <div class="card">
+        <div class="card-top">
+          <div class="card-date">${l.date} <span class="card-time">${l.time || ''}</span></div>
+          <div class="pips">${pips}<div class="pip-lbl">${l.mood}/5</div></div>
+        </div>
+        <div class="card-body">
+          <div><div class="field-k">worked on</div><div class="field-v">${l.worked_on}</div></div>
+          <div><div class="field-k">learned</div><div class="field-v">${l.learned}</div></div>
+          ${blockedRow}
+        </div>
+        <div class="card-foot">
+          <div class="tags">${tags}</div>
+          ${blockedTag}
+        </div>
+      </div>`;
+  }).join('');
+
+  // ── MOOD CHART ──
+  const moodBars = document.querySelector('.mood-bars');
+  const last7 = [...logs].sort((a, b) => new Date(a.date) - new Date(b.date)).slice(-7);
+  moodBars.innerHTML = last7.map(l => `
+    <div class="mb-wrap">
+      <div class="mb" style="height:${(l.mood/5)*100}%"></div>
+      <div class="mb-lbl">${l.date.slice(5)}</div>
+    </div>`
+  ).join('');
+
+  // avg mood line
+  const weekAvg = (last7.reduce((a, b) => a + b.mood, 0) / last7.length).toFixed(1);
+  document.querySelector('.mood-bars + div span:last-child').textContent = weekAvg + ' / 5';
+
+  // ── TOP TAGS ──
+  const tagMap = {};
+  logs.forEach(l => l.tags.forEach(t => tagMap[t] = (tagMap[t] || 0) + 1));
+  const topTags = Object.entries(tagMap).sort((a, b) => b[1] - a[1]).slice(0, 5);
+  const maxCount = topTags[0][1];
+
+  document.querySelector('.tag-rows').innerHTML = topTags.map(([tag, count]) => `
+    <div class="tr">
+      <div class="tr-n">${tag}</div>
+      <div class="tr-bg"><div class="tr-fill" style="width:${(count/maxCount)*100}%"></div></div>
+      <div class="tr-c">${count}</div>
+    </div>`
+  ).join('');
+
+  // ── SUMMARY ──
+  const bestMood = logs.reduce((a, b) => a.mood > b.mood ? a : b);
+  const uniqueTags = Object.keys(tagMap).length;
+  const thisMonth = logs.filter(l => l.date.startsWith(new Date().toISOString().slice(0,7))).length;
+
+  document.querySelector('.sum-rows').innerHTML = `
+    <div class="sr"><span class="sr-k">total entries</span><span style="color:var(--purple3)">${total}</span></div>
+    <div class="sr"><span class="sr-k">days blocked</span><span style="color:var(--red)">${blockers}</span></div>
+    <div class="sr"><span class="sr-k">best mood day</span><span style="color:var(--green)">${bestMood.date} (${bestMood.mood}/5)</span></div>
+    <div class="sr"><span class="sr-k">best streak</span><span style="color:var(--green)">${streak} days</span></div>
+    <div class="sr"><span class="sr-k">avg mood</span><span style="color:var(--yellow)">${avgMood} / 5</span></div>
+    <div class="sr"><span class="sr-k">unique tags</span><span style="color:var(--purple3)">${uniqueTags}</span></div>
+    <div class="sr"><span class="sr-k">this month</span><span style="color:var(--cyan)">${thisMonth} days</span></div>
+  `;
+</script>
 </body>
 </html>
