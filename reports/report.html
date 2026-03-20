@@ -926,7 +926,7 @@
   const weekAvg = (last7.reduce((a, b) => a + b.mood, 0) / last7.length).toFixed(1);
   document.querySelector('.mood-bars + div span:last-child').textContent = weekAvg + ' / 5';
 
-  // ── TOP TAGS ──
+  // ──top tags ──
   const tagMap = {};
   logs.forEach(l => l.tags.forEach(t => tagMap[t] = (tagMap[t] || 0) + 1));
   const topTags = Object.entries(tagMap).sort((a, b) => b[1] - a[1]).slice(0, 5);
