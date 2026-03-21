@@ -743,7 +743,97 @@ void editEntry() {
         std::cout << "  \033[31m[x] Could not save entry.\033[0m\n\n";
     }
 }
+void generateReport() {
+    // read all json files from logs/
+    std::vector<std::string> files;
+    DIR* dir = opendir("logs");
+    if (!dir) {
+        std::cout << "  [x] No logs folder found.\n\n";
+        return;
+    }
+    struct dirent* entry;
+    while ((entry = readdir(dir)) != NULL) {
+        std::string name = entry->d_name;
+        if (name.size() > 5 && name.substr(name.size() - 5) == ".json") {
+            files.push_back("logs/" + name);
+        }
+    }
+    closedir(dir);
 
+    if (files.empty()) {
+        std::cout << "  [x] No entries found.\n\n";
+        return;
+    }
+
+    std::sort(files.begin(), files.end(), std::greater<std::string>());
+
+    // build logs array string
+    std::string logsArray = "[\n";
+    for (int i = 0; i < (int)files.size(); i++) {
+        Entry e = readEntry(files[i]);
+        logsArray += "    {\n";
+        logsArray += "      date: \"" + e.date + "\",\n";
+        logsArray += "      time: \"" + e.time + "\",\n";
+        logsArray += "      worked_on: \"" + e.worked_on + "\",\n";
+        logsArray += "      learned: \"" + e.learned + "\",\n";
+        if (e.blocked.empty() || e.blocked == "nothing" || e.blocked == "Nothing") {
+            logsArray += "      blocked: null,\n";
+        } else {
+            logsArray += "      blocked: \"" + e.blocked + "\",\n";
+        }
+        // build tags array
+        std::string tagsArr = "[";
+        std::istringstream iss(e.tags);
+        std::string tag;
+        bool first = true;
+        while (iss >> tag) {
+            if (tag == "--" || tag == "no" || tag == "none") continue;
+            if (!first) tagsArr += ", ";
+            tagsArr += "\"" + tag + "\"";
+            first = false;
+        }
+        tagsArr += "]";
+        logsArray += "      tags: " + tagsArr + ",\n";
+        logsArray += "      mood: " + std::to_string(e.mood) + "\n";
+        logsArray += "    }";
+        if (i < (int)files.size() - 1) logsArray += ",";
+        logsArray += "\n";
+    }
+    logsArray += "  ]";
+
+    // read template
+    std::ifstream tmpl("reports/report.html");
+    if (!tmpl.is_open()) {
+        std::cout << "  [x] reports/report.html template not found.\n\n";
+        return;
+    }
+    std::string html((std::istreambuf_iterator<char>(tmpl)),
+                      std::istreambuf_iterator<char>());
+    tmpl.close();
+
+    // find and replace logs array
+    std::string startMark = "const logs = [";
+    std::string endMark = "];";
+    size_t startPos = html.find(startMark);
+    size_t endPos = html.find(endMark, startPos);
+
+    if (startPos == std::string::npos || endPos == std::string::npos) {
+        std::cout << "  [x] Could not find logs array in template.\n\n";
+        return;
+    }
+
+    html = html.substr(0, startPos) +
+           "const logs = " + logsArray + ";" +
+           html.substr(endPos + 2);
+
+    // write output
+    std::ofstream out("reports/report.html");
+    out << html;
+    out.close();
+
+    std::cout << "\n  \033[32m[OK]\033[0m Report generated!\n";
+    std::cout << "  Open reports/report.html in your browser.\n\n";
+}
 int main(int argc, char* argv[]) {
 
     #ifdef _WIN32
@@ -787,7 +877,7 @@ int main(int argc, char* argv[]) {
     } else if (command == "week") {
         showWeek();
     } else if (command == "report") {
-        std::cout << "  [report] Coming on Day 15!\n\n";//:html report generation
+        generateReport();
     } else if (command == "edit") {
        editEntry();
     } else {
