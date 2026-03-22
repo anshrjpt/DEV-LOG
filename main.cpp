@@ -219,6 +219,7 @@ void printHelp() {
     std::cout << "    stats    ->  Show coding stats dashboard\n";
     std::cout << "    week     ->  Show this week's summary\n";
     std::cout << "    report   ->  Generate HTML report\n";
+    std::cout << "    streak   ->  Show current coding streak\n";
     std::cout << "    edit     ->  Edit the last entry\n";
     std::cout << "    help     ->  Show this help message\n";
     std::cout << "\n";
@@ -834,6 +835,52 @@ void generateReport() {
     std::cout << "\n  \033[32m[OK]\033[0m Report generated!\n";
     std::cout << "  Open reports/report.html in your browser.\n\n";
 }
+void showStreak() {
+    std::vector<std::string> files = getJsonFiles();
+    if (files.empty()) {
+        std::cout << "  [x] No entries found.\n\n";
+        return;
+    }
+
+    std::sort(files.begin(), files.end());
+
+    // current streak
+    int streak = 0;
+    std::string checkDate = getToday();
+    for (int i = 0; i < (int)files.size(); i++) {
+        std::ifstream f("logs/" + checkDate + ".json");
+        if (f.is_open()) {
+            f.close();
+            streak++;
+            checkDate = addDays(checkDate, -1);
+        } else break;
+    }
+
+    // longest streak
+    int longest = 1;
+    int current = 1;
+    for (int i = 1; i < (int)files.size(); i++) {
+        Entry e1 = readEntry(files[i-1]);
+        Entry e2 = readEntry(files[i]);
+        if (e2.date == addDays(e1.date, 1)) {
+            current++;
+            if (current > longest) longest = current;
+        } else {
+            current = 1;
+        }
+    }
+
+    // visual bar
+    std::string bar = "";
+    for (int i = 0; i < streak; i++)   bar += "█";
+    for (int i = streak; i < 30; i++)  bar += "░";
+
+    std::cout << "\n";
+    std::cout << "  streak    " << streak  << " days\n";
+    std::cout << "  longest   " << longest << " days\n";
+    std::cout << "  entries   " << files.size() << "\n\n";
+    std::cout << "  " << bar << "\n\n";
+}
 int main(int argc, char* argv[]) {
 
     #ifdef _WIN32
@@ -876,7 +923,9 @@ int main(int argc, char* argv[]) {
         showStats();
     } else if (command == "week") {
         showWeek();
-    } else if (command == "report") {
+    } else if (command == "streak") {
+        showStreak();
+    }else if (command == "report") {
         generateReport();
     } else if (command == "edit") {
        editEntry();
