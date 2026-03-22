@@ -593,8 +593,8 @@
     </div>
     <div class="header-chips">
       <div class="chip"><span class="live-dot"></span> C++ / CLI</div>
-      <div class="chip"><span style="color:var(--purple3)">24</span> &nbsp;entries</div>
-      <div class="chip"><span style="color:var(--green)">7</span> &nbsp;day streak</div>
+        <div class="chip"><span style="color:var(--purple3)">24</span> &nbsp;entries</div>
+        <div class="chip" id="streak-chip"><span style="color:var(--green)">7</span> &nbsp;streak</div>
     </div>
     <div class="header-line"></div>
   </div>
@@ -801,54 +801,44 @@
       <a href="https://github.com/mishika-agarwal-1111">mishika</a>
     </div>
   </div>
-
 </div>
 <script>
   const logs = [
     {
+      date: "2026-03-09",
+      time: "",
+      worked_on: "day 10",
+      learned: "void edit entry ",
+      blocked: null,
+      tags: [],
+      mood: 3
+    },
+    {
+      date: "2026-03-08",
+      time: "",
+      worked_on: "day9",
+      learned: "impemented ay 9 week",
+      blocked: null,
+      tags: ["debbuging"],
+      mood: 3
+    },
+    {
+      date: "2026-03-07",
+      time: "",
+      worked_on: "coded the day 8 part",
+      learned: "how to implement stats",
+      blocked: null,
+      tags: [],
+      mood: 4
+    },
+    {
       date: "2026-03-05",
-      time: "14:30",
-      worked_on: "built the json parsing feature using find() and substr()",
-      learned: "how string manipulation works in C++ and why npos is returned when find() fails",
-      blocked: null,
-      tags: ["cpp", "json", "parsing", "foss"],
+      time: "",
+      worked_on: "BUILD THE SYSTEM",
+      learned: "CPP",
+      blocked: "NOTHING",
+      tags: ["CPP", "NETWORKING", "DEBUG"],
       mood: 4
-    },
-    {
-      date: "2026-03-04",
-      time: "18:15",
-      worked_on: "switched from .txt to .json format for saving entries",
-      learned: "how to manually write json using ofstream without any external library",
-      blocked: null,
-      tags: ["cpp", "json", "foss", "devlog"],
-      mood: 5
-    },
-    {
-      date: "2026-03-03",
-      time: "21:45",
-      worked_on: "saving entries to logs/ folder as dated files",
-      learned: "how ofstream works and how mkdir creates folders automatically in C++",
-      blocked: "mkdir not working on Windows — needed #ifdef cross-platform fix",
-      tags: ["cpp", "files", "windows", "bugfix"],
-      mood: 3
-    },
-    {
-      date: "2026-03-02",
-      time: "16:00",
-      worked_on: "user input system with getline and the ask() helper function",
-      learned: "ANSI escape codes for terminal colors and how structs work in C++",
-      blocked: null,
-      tags: ["cpp", "cli", "ansi", "structs"],
-      mood: 4
-    },
-    {
-      date: "2026-03-01",
-      time: "11:20",
-      worked_on: "project setup, folder structure, first main.cpp with hello devlog",
-      learned: "how to compile C++ with g++ and set up VS Code for development",
-      blocked: null,
-      tags: ["cpp", "setup", "vscode", "foss"],
-      mood: 3
     }
   ];
 
@@ -879,7 +869,7 @@
   // header chips
   const chips = document.querySelectorAll('.chip');
   chips[1].innerHTML = `<span style="color:var(--purple3)">${total}</span> &nbsp;entries`;
-  chips[2].innerHTML = `<span style="color:var(--green)">${streak}</span> &nbsp;day streak`;
+  chips[2].innerHTML = `<span style="color:var(--green)">${streak}</span> &nbsp;streak`;
 
   // ── ENTRY CARDS ──
   const timeline = document.querySelector('.timeline');
@@ -930,15 +920,16 @@
   const tagMap = {};
   logs.forEach(l => l.tags.forEach(t => tagMap[t] = (tagMap[t] || 0) + 1));
   const topTags = Object.entries(tagMap).sort((a, b) => b[1] - a[1]).slice(0, 5);
-  const maxCount = topTags[0][1];
-
-  document.querySelector('.tag-rows').innerHTML = topTags.map(([tag, count]) => `
-    <div class="tr">
-      <div class="tr-n">${tag}</div>
-      <div class="tr-bg"><div class="tr-fill" style="width:${(count/maxCount)*100}%"></div></div>
-      <div class="tr-c">${count}</div>
-    </div>`
-  ).join('');
+  if (topTags.length > 0) {
+    const maxCount = topTags[0][1];
+    document.querySelector('.tag-rows').innerHTML = topTags.map(([tag, count]) => `
+      <div class="tr">
+        <div class="tr-n">${tag}</div>
+        <div class="tr-bg"><div class="tr-fill" style="width:${(count/maxCount)*100}%"></div></div>
+        <div class="tr-c">${count}</div>
+      </div>`
+    ).join('');
+  }
 
   // ── SUMMARY ──
   const bestMood = logs.reduce((a, b) => a.mood > b.mood ? a : b);
