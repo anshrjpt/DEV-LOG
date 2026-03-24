@@ -220,6 +220,7 @@ void printHelp() {
     std::cout << "    week     ->  Show this week's summary\n";
     std::cout << "    report   ->  Generate HTML report\n";
     std::cout << "    streak   ->  Show current coding streak\n";
+    std::cout << "    tags     ->  Show all tags with counts\n";
     std::cout << "    edit     ->  Edit the last entry\n";
     std::cout << "    help     ->  Show this help message\n";
     std::cout << "\n";
@@ -881,6 +882,50 @@ void showStreak() {
     std::cout << "  entries   " << files.size() << "\n\n";
     std::cout << "  " << bar << "\n\n";
 }
+void showTags() {
+    std::vector<std::string> files = getJsonFiles();
+
+    if (files.empty()) {
+        std::cout << "  [x] No entries found.\n\n";
+        return;
+    }
+
+    std::map<std::string, int> tagCount;
+    for (const auto& filename : files) {
+        Entry e = readEntry(filename);
+        std::istringstream iss(e.tags);
+        std::string tag;
+        while (iss >> tag) {
+            if (tag == "--" || tag == "no" || tag == "none") continue;
+            tagCount[tag]++;
+        }
+    }
+
+    if (tagCount.empty()) {
+        std::cout << "  no tags found.\n\n";
+        return;
+    }
+
+    // sort by count
+    std::vector<std::pair<std::string, int>> sorted(tagCount.begin(), tagCount.end());
+    std::sort(sorted.begin(), sorted.end(), [](const auto& a, const auto& b) {
+        return b.second < a.second;
+    });
+
+    int maxCount = sorted[0].second;
+
+    std::cout << "\n";
+    for (const auto& pair : sorted) {
+        int barLen = (pair.second * 20) / maxCount;
+        std::string bar = "";
+        for (int i = 0; i < barLen; i++)  bar += "█";
+        for (int i = barLen; i < 20; i++) bar += "░";
+
+        std::cout << "  " << std::left << std::setw(14) << pair.first
+                  << bar << "  " << pair.second << "\n";
+    }
+    std::cout << "\n";
+}
 int main(int argc, char* argv[]) {
 
     #ifdef _WIN32
@@ -925,6 +970,8 @@ int main(int argc, char* argv[]) {
         showWeek();
     } else if (command == "streak") {
         showStreak();
+    } else if (command == "tags") {
+      showTags();
     }else if (command == "report") {
         generateReport();
     } else if (command == "edit") {
