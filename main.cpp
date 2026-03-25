@@ -221,6 +221,7 @@ void printHelp() {
     std::cout << "    report   ->  Generate HTML report\n";
     std::cout << "    streak   ->  Show current coding streak\n";
     std::cout << "    tags     ->  Show all tags with counts\n";
+    std::cout << "    best     ->  Show your best days\n";
     std::cout << "    edit     ->  Edit the last entry\n";
     std::cout << "    help     ->  Show this help message\n";
     std::cout << "\n";
@@ -926,6 +927,48 @@ void showTags() {
     }
     std::cout << "\n";
 }
+void showBest() {
+    std::vector<std::string> files = getJsonFiles();
+
+    if (files.empty()) {
+        std::cout << "  [x] No entries found.\n\n";
+        return;
+    }
+
+    std::sort(files.begin(), files.end());
+    std::vector<Entry> entries;
+    for (const auto& f : files) entries.push_back(readEntry(f));
+
+    // best mood day
+    Entry bestMoodEntry = entries[0];
+    for (const auto& e : entries)
+        if (e.mood > bestMoodEntry.mood) bestMoodEntry = e;
+
+    // most productive day (longest worked_on)
+    Entry mostProductive = entries[0];
+    for (const auto& e : entries)
+        if (e.worked_on.length() > mostProductive.worked_on.length()) mostProductive = e;
+
+    // most tags day
+    Entry mostTags = entries[0];
+    int maxTags = 0;
+    for (const auto& e : entries) {
+        std::istringstream iss(e.tags);
+        std::string tag;
+        int count = 0;
+        while (iss >> tag) count++;
+        if (count > maxTags) {
+            maxTags = count;
+            mostTags = e;
+        }
+    }
+
+    std::cout << "\n";
+    std::cout << "  best mood       " << bestMoodEntry.date << "  " << moodToStars(bestMoodEntry.mood) << "  " << bestMoodEntry.mood << "/5\n";
+    std::cout << "  most productive " << mostProductive.date << "  " << mostProductive.worked_on.substr(0, 40) << "\n";
+    std::cout << "  most tags       " << mostTags.date << "  " << mostTags.tags << "\n";
+    std::cout << "\n";
+}
 int main(int argc, char* argv[]) {
 
     #ifdef _WIN32
@@ -972,6 +1015,8 @@ int main(int argc, char* argv[]) {
         showStreak();
     } else if (command == "tags") {
       showTags();
+    } else if (command == "best") {
+    showBest();
     }else if (command == "report") {
         generateReport();
     } else if (command == "edit") {
