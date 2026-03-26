@@ -222,6 +222,7 @@ void printHelp() {
     std::cout << "    streak   ->  Show current coding streak\n";
     std::cout << "    tags     ->  Show all tags with counts\n";
     std::cout << "    best     ->  Show your best days\n";
+    std::cout << "    export   ->  Export all entries to a single JSON\n";
     std::cout << "    edit     ->  Edit the last entry\n";
     std::cout << "    help     ->  Show this help message\n";
     std::cout << "\n";
@@ -969,6 +970,45 @@ void showBest() {
     std::cout << "  most tags       " << mostTags.date << "  " << mostTags.tags << "\n";
     std::cout << "\n";
 }
+void exportEntries() {
+    std::vector<std::string> files = getJsonFiles();
+
+    if (files.empty()) {
+        std::cout << "  [x] No entries found.\n\n";
+        return;
+    }
+
+    std::sort(files.begin(), files.end());
+
+    std::string exportFile = "devlog-export-" + getToday() + ".json";
+    std::ofstream out(exportFile);
+
+    if (!out.is_open()) {
+        std::cout << "  [x] Could not create export file.\n\n";
+        return;
+    }
+
+    out << "[\n";
+    for (int i = 0; i < (int)files.size(); i++) {
+        Entry e = readEntry(files[i]);
+        out << "  {\n";
+        out << "    \"date\": \""      << e.date      << "\",\n";
+        out << "    \"time\": \""      << e.time      << "\",\n";
+        out << "    \"worked_on\": \"" << e.worked_on << "\",\n";
+        out << "    \"learned\": \""   << e.learned   << "\",\n";
+        out << "    \"blocked\": \""   << e.blocked   << "\",\n";
+        out << "    \"tags\": \""      << e.tags      << "\",\n";
+        out << "    \"mood\": "        << e.mood      << "\n";
+        out << "  }";
+        if (i < (int)files.size() - 1) out << ",";
+        out << "\n";
+    }
+    out << "]\n";
+    out.close();
+
+    std::cout << "\n  \033[32m[OK]\033[0m Exported " << files.size() << " entries\n";
+    std::cout << "  File: " << exportFile << "\n\n";
+}
 int main(int argc, char* argv[]) {
 
     #ifdef _WIN32
@@ -1017,6 +1057,8 @@ int main(int argc, char* argv[]) {
       showTags();
     } else if (command == "best") {
     showBest();
+    } else if (command == "export") {
+    exportEntries();
     }else if (command == "report") {
         generateReport();
     } else if (command == "edit") {
