@@ -223,6 +223,7 @@ void printHelp() {
     std::cout << "    tags     ->  Show all tags with counts\n";
     std::cout << "    best     ->  Show your best days\n";
     std::cout << "    export   ->  Export all entries to a single JSON\n";
+    std::cout << "    summary  ->  Show weekly summary\n";
     std::cout << "    edit     ->  Edit the last entry\n";
     std::cout << "    help     ->  Show this help message\n";
     std::cout << "\n";
@@ -1009,6 +1010,96 @@ void exportEntries() {
     std::cout << "\n  \033[32m[OK]\033[0m Exported " << files.size() << " entries\n";
     std::cout << "  File: " << exportFile << "\n\n";
 }
+void showSummary() {
+    std::vector<std::string> files = getJsonFiles();
+
+    if (files.empty()) {
+        std::cout << "  [x] No entries found.\n\n";
+        return;
+    }
+
+    std::sort(files.begin(), files.end());
+    std::vector<Entry> entries;
+    for (const auto& f : files) entries.push_back(readEntry(f));
+
+    // this week's entries
+    time_t now = time(0);
+    tm* ltm = localtime(&now);
+    int todayWeekday = ltm->tm_wday;
+    int daysFromMonday = (todayWeekday == 0) ? 6 : todayWeekday - 1;
+    std::string weekStart = addDays(getToday(), -daysFromMonday);
+
+    std::vector<Entry> weekEntries;
+    for (const auto& e : entries)
+        if (e.date >= weekStart) weekEntries.push_back(e);
+
+    // stats
+    int total = entries.size();
+    int weekTotal = weekEntries.size();
+    int totalMood = 0;
+    int weekMood = 0;
+    std::map<std::string, int> tagCount;
+
+    for (const auto& e : entries) {
+        totalMood += e.mood;
+        std::istringstream iss(e.tags);
+        std::string tag;
+        while (iss >> tag) {
+            if (tag == "--" || tag == "no" || tag == "none") continue;
+            tagCount[tag]++;
+        }
+    }
+
+    for (const auto& e : weekEntries) weekMood += e.mood;
+
+    double avgMoodAll  = (double)totalMood / total;
+    double avgMoodWeek = weekEntries.empty() ? 0 : (double)weekMood / weekEntries.size();
+
+    // top 3 tags
+    std::vector<std::pair<std::string, int>> sortedTags(tagCount.begin(), tagCount.end());
+    std::sort(sortedTags.begin(), sortedTags.end(), [](const auto& a, const auto& b) {
+        return b.second < a.second;
+    });
+
+    // streak
+    int streak = 0;
+    std::string checkDate = getToday();
+    for (int i = 0; i < total; i++) {
+        std::ifstream f("logs/" + checkDate + ".json");
+        if (f.is_open()) { f.close(); streak++; checkDate = addDays(checkDate, -1); }
+        else break;
+    }
+
+    std::cout << "\n";
+    std::cout << "  // weekly summary\n\n";
+    std::cout << "  this week     " << weekTotal << " entries\n";
+    std::cout << "  week mood     " << std::fixed << std::setprecision(1) << avgMoodWeek << "/5\n";
+    std::cout << "  all time      " << total << " entries\n";
+    std::cout << "  all mood      " << std::fixed << std::setprecision(1) << avgMoodAll << "/5\n";
+    std::cout << "  streak        " << streak << " days\n\n";
+
+    if (!sortedTags.empty()) {
+        std::cout << "  top tags\n";
+        int limit = std::min((int)sortedTags.size(), 3);
+        for (int i = 0; i < limit; i++) {
+            std::cout << "  " << std::left << std::setw(14) << sortedTags[i].first
+                      << sortedTags[i].second << "x\n";
+        }
+    }
+
+    // mood this week visual
+    if (!weekEntries.empty()) {
+        std::cout << "\n  mood this week\n  ";
+        for (const auto& e : weekEntries) {
+            if      (e.mood >= 4) std::cout << "\033[32m█\033[0m";
+            else if (e.mood == 3) std::cout << "\033[33m█\033[0m";
+            else                  std::cout << "\033[31m█\033[0m";
+        }
+        std::cout << "\n";
+    }
+
+    std::cout << "\n";
+}
 int main(int argc, char* argv[]) {
 
     #ifdef _WIN32
@@ -1059,6 +1150,8 @@ int main(int argc, char* argv[]) {
     showBest();
     } else if (command == "export") {
     exportEntries();
+    } else if (command == "summary") {
+    showSummary();
     }else if (command == "report") {
         generateReport();
     } else if (command == "edit") {
