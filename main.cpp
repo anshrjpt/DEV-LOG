@@ -131,8 +131,7 @@ void checkReminders() {
         std::cout << "  Run './devlog new' before the day ends!\n\n";
     }
 
-    // --- Mood warning ---
-    // read last 3 entries and check if avg is below 2.5
+    // --- mood warning 
     std::vector<std::string> files;
 
 #ifdef _WIN32
@@ -199,11 +198,9 @@ void checkReminders() {
 void printBanner() {
     std::cout << "\n";
     std::cout << "  +----------------------------------+\n";
-    std::cout << "  |                                  |\n";
     std::cout << "  |   >> DEVLOG                      |\n";
-    std::cout << "  |   // developer journal           |\n";
+    std::cout << "  |   // DEVLEPOR  JOURNAL           |\n";
     std::cout << "  |   ## v1.0 | FOSS | CLI           |\n";
-    std::cout << "  |                                  |\n";
     std::cout << "  +----------------------------------+\n";
     std::cout << "\n";
     std::cout << "  type './devlog help' to get started\n\n";
@@ -212,20 +209,20 @@ void printBanner() {
 void printHelp() {
     std::cout << "  Usage: ./devlog <command>\n\n";
     std::cout << "  Commands:\n";
-    std::cout << "    new      ->  Log today's dev session\n";
-    std::cout << "    read     ->  Read entry by date (YYYY-MM-DD)\n";
-    std::cout << "    list     ->  View all past entries\n";
-    std::cout << "    search   ->  Search entries by keyword\n";
-    std::cout << "    stats    ->  Show coding stats dashboard\n";
-    std::cout << "    week     ->  Show this week's summary\n";
-    std::cout << "    report   ->  Generate HTML report\n";
-    std::cout << "    streak   ->  Show current coding streak\n";
-    std::cout << "    tags     ->  Show all tags with counts\n";
-    std::cout << "    best     ->  Show your best days\n";
-    std::cout << "    export   ->  Export all entries to a single JSON\n";
-    std::cout << "    summary  ->  Show weekly summary\n";
-    std::cout << "    edit     ->  Edit the last entry\n";
-    std::cout << "    help     ->  Show this help message\n";
+    std::cout << "     NEW     ->  Log today's dev session\n";
+    std::cout << "    READ     ->  Read entry by date (YYYY-MM-DD)\n";
+    std::cout << "    LIST     ->  View all past entries\n";
+    std::cout << "    SEARCH   ->  Search entries by keyword\n";
+    std::cout << "    STATS    ->  Show coding stats dashboard\n";
+    std::cout << "    WEEK     ->  Show this week's summary\n";
+    std::cout << "    REPORT   ->  Generate HTML report\n";
+    std::cout << "    STREAK   ->  Show current coding streak\n";
+    std::cout << "    TAGS     ->  Show all tags with counts\n";
+    std::cout << "    BEST     ->  Show your best days\n";
+    std::cout << "    EXPORT   ->  Export all entries to a single JSON\n";
+    std::cout << "    SUMMARY  ->  Show weekly summary\n";
+    std::cout << "    EDIT     ->  Edit the last entry\n";
+    std::cout << "    HELP     ->  Show this help message\n";
     std::cout << "\n";
     std::cout << "  Examples:\n";
     std::cout << "    ./devlog new\n";
