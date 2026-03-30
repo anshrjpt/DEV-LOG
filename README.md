@@ -110,8 +110,8 @@ This project is being built live at **1 hour per day** as part of a FOSS hackath
 | Foundation & Setup | Days 1-5 | Complete |
 | Core C++ Logic | Days 6-12 | Complete |
 | HTML Report Generator | Days 13-19 | Complete |
-| Extra Features | Days 20-30 | Complete |
-| Polish & Submit | Days 30-31 | Upcoming |
+| Extra Features | Days 20-25 | Complete |
+| Polish & Submit | Days 25-30 | Complete |
 ---
 
 ## Contributing
